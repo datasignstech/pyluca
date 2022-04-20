@@ -1,8 +1,8 @@
 from enum import Enum
-from typing import List, Dict
+from typing import Dict
 
 from pydictable.core import DictAble
-from pydictable.field import ListField, StrField, DictValueField, EnumField
+from pydictable.field import StrField, DictValueField, EnumField
 
 
 class BalanceType(Enum):
@@ -26,5 +26,5 @@ class AccountType(DictAble):
 
 class AccountingConfig(DictAble):
     account_types: Dict[str, AccountType] = DictValueField(AccountType, required=True)
-    accounts: Dict[str, Account] = DictValueField(Account)
-    rules: Dict[str, Rule] = DictValueField(Rule)
+    accounts: Dict[str, Account] = DictValueField(Account, required=True)
+    rules: Dict[str, Rule] = DictValueField(Rule, required=True)
