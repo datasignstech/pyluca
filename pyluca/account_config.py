@@ -15,8 +15,8 @@ class RuleConfig(DictAble):
 
 
 class AccountingConfig(DictAble):
-    ACCOUNT_TYPES: List[str] = ListField(StrField(), required=True)
-    DEBIT_BALANCE_ACCOUNT_TYPES: List[str] = ListField(StrField(), required=True)
-    CREDIT_BALANCE_ACCOUNT_TYPES: List[str] = ListField(StrField(), required=True)
-    ACCOUNTS: Dict[str, AccountConfig] = DictValueField(AccountConfig)
-    RULES: Dict[str, RuleConfig] = DictValueField(RuleConfig)
+    account_types: List[str] = ListField(StrField(), required=True)
+    debit_balance_account_types: List[str] = ListField(StrField(), required=True)
+    credit_balance_account_types: List[str] = ListField(StrField(), required=True)
+    accounts: Dict[str, AccountConfig] = DictValueField(AccountConfig)
+    rules: Dict[str, RuleConfig] = DictValueField(RuleConfig)

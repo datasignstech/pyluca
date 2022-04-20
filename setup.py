@@ -13,6 +13,6 @@ setuptools.setup(
     long_description_content_type='text/plain',
     install_requires=[
         'pandas==1.1.5',
-        'pydictable==0.9.4'
+        'pydictable==0.9.6'
     ]
 )

@@ -2,9 +2,9 @@ import json
 import re
 from datetime import datetime
 from typing import NamedTuple, List, Optional
-from account_config import AccountingConfig
-from journal import JournalEntry
-from amount_counter import AmountCounter
+from pyluca.account_config import AccountingConfig
+from pyluca.journal import JournalEntry
+from pyluca.amount_counter import AmountCounter
 
 
 class AccountAge(NamedTuple):
@@ -43,10 +43,10 @@ def get_account_aging(
     filtered_entries = [e for e in entries if e.date <= as_of and e.account == account]
     positive_entries: List[PositiveEntry] = []
     active_counter_idx, excess_amount = 0, 0
-    account_type = config.ACCOUNTS[account].type
+    account_type = config.accounts[account].type
     for entry in filtered_entries:
-        positive_amount = entry.cr_amount if account_type in config.CREDIT_BALANCE_ACCOUNT_TYPES else entry.dr_amount
-        negative_amount = entry.dr_amount if account_type in config.CREDIT_BALANCE_ACCOUNT_TYPES else entry.cr_amount
+        positive_amount = entry.cr_amount if account_type in config.credit_balance_account_types else entry.dr_amount
+        negative_amount = entry.dr_amount if account_type in config.credit_balance_account_types else entry.cr_amount
         if positive_amount > 0:
             meta = re.match('.*##(.*)##.*', entry.narration)
             positive_entries.append(

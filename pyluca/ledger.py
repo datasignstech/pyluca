@@ -1,7 +1,7 @@
 import pandas as pd
 
-from account_config import AccountingConfig
-from journal import Journal
+from pyluca.account_config import AccountingConfig
+from pyluca.journal import Journal
 
 
 class Ledger:
@@ -16,8 +16,8 @@ class Ledger:
         return sum([j.cr_amount for j in self.journal.entries if j.account == account])
 
     def get_account_balance(self, account: str):
-        assert self.config.ACCOUNTS[account].type in self.config.ACCOUNT_TYPES
-        if self.config.ACCOUNTS[account].type in self.config.DEBIT_BALANCE_ACCOUNT_TYPES:
+        assert self.config.accounts[account].type in self.config.account_types
+        if self.config.accounts[account].type in self.config.debit_balance_account_types:
             return self.get_account_dr(account) - self.get_account_cr(account)
         return self.get_account_cr(account) - self.get_account_dr(account)
 

@@ -1,8 +1,8 @@
 import datetime
 import json
 
-from account_config import AccountingConfig
-from journal import Journal, JournalEntry
+from pyluca.account_config import AccountingConfig
+from pyluca.journal import Journal, JournalEntry
 
 
 class Accountant:
@@ -26,7 +26,7 @@ class Accountant:
         self.journal.entries.append(JournalEntry(len(self.journal.entries), cr_account, 0, amount, date, narration, index))
 
     def record(self, rule: str, amount: float, date: datetime.datetime, note: str = '', meta: dict = None):
-        rule = self.config.RULES[rule]
+        rule = self.config.rules[rule]
         narration = f'{rule.narration} {note}'
         if meta:
             narration = f'{narration} ##{json.dumps(meta)}##'
