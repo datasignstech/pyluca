@@ -7,9 +7,11 @@ from pyluca.journal import JournalEntry
 
 
 ACCOUNT_CONFIG = AccountingConfig(dict={
-    'account_types': ['ASSET'],
-    'debit_balance_account_types': ['ASSET'],
-    'credit_balance_account_types': [],
+    'account_types': {
+        'ASSET': {
+            'balance_type': 'DEBIT'
+        }
+    },
     'accounts': {
         'SALARY': {
             'type': 'ASSET'

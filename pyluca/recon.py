@@ -1,5 +1,5 @@
 import datetime
-from pyluca.account_config import AccountingConfig
+from pyluca.account_config import AccountingConfig, BalanceType
 from pyluca.accountant import Accountant
 from pyluca.journal import Journal
 from pyluca.ledger import Ledger
@@ -29,7 +29,7 @@ def reconcile_ledger(
                - Ledger(closed_accountant.journal, config).get_account_balance(acct_name)
         if diff == 0:
             continue
-        if config.accounts[acct_name].type in config.debit_balance_account_types:
+        if config.account_types[config.accounts[acct_name].type].balance_type == BalanceType.DEBIT:
             closed_accountant.adjust(acct_name, 'RECONCILE_CONTROL', diff, date)
         else:
             closed_accountant.adjust('RECONCILE_CONTROL', acct_name, diff, date)
