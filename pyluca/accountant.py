@@ -17,13 +17,12 @@ class Accountant:
             cr_account: str,
             amount: float,
             date: datetime.datetime,
-            narration: str,
-            index: str
+            narration: str
     ):
         if amount == 0:
             return
-        self.journal.entries.append(JournalEntry(len(self.journal.entries), dr_account, amount, 0, date, narration, index))
-        self.journal.entries.append(JournalEntry(len(self.journal.entries), cr_account, 0, amount, date, narration, index))
+        self.journal.entries.append(JournalEntry(len(self.journal.entries), dr_account, amount, 0, date, narration, self.key))
+        self.journal.entries.append(JournalEntry(len(self.journal.entries), cr_account, 0, amount, date, narration, self.key))
 
     def record(self, rule: str, amount: float, date: datetime.datetime, note: str = '', meta: dict = None):
         rule = self.config.rules[rule]
@@ -36,9 +35,8 @@ class Accountant:
                 rule.cr_account,
                 amount,
                 date,
-                narration,
-                self.key
+                narration
             )
 
     def adjust(self, dr_acct: str, cr_acct: str, amount: float, date: datetime.datetime):
-        self.enter_journal(dr_acct, cr_acct, amount, date, 'Reconcile adjust', self.key)
+        self.enter_journal(dr_acct, cr_acct, amount, date, 'Reconcile adjust')
