@@ -11,8 +11,5 @@ setuptools.setup(
     include_package_data=True,
     long_description='A headless python Double Entry Accounting package',
     long_description_content_type='text/plain',
-    install_requires=[
-        'pandas==1.1.5',
-        'pydictable==0.9.6'
-    ]
+    install_requires=[r for r in open('requirements.txt', 'r').read().split('\n') if r]
 )
