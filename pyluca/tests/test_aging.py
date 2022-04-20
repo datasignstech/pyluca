@@ -39,29 +39,29 @@ class TestAging(TestCase):
     def test_aging(self):
         dt = datetime.now()
         ages = get_account_aging(account_config, [
-            JournalEntry(1, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(2, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(3, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(4, 'SALARY', 0, 4000, dt, '', '1'),
-        ], 'SALARY', dt)
+            JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(3, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(4, 'SAVINGS_BANK', 0, 4000, dt, '', '1'),
+        ], 'SAVINGS_BANK', dt)
         for age in ages:
             self.assertEqual(age.counter.is_paid(), True)
 
         ages = get_account_aging(account_config, [
-            JournalEntry(4, 'SALARY', 0, 4000, dt, '', '1'),
-            JournalEntry(1, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(2, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(3, 'SALARY', 1000, 0, dt, '', '1'),
-        ], 'SALARY', dt)
+            JournalEntry(4, 'SAVINGS_BANK', 0, 4000, dt, '', '1'),
+            JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(3, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+        ], 'SAVINGS_BANK', dt)
         for age in ages:
             self.assertEqual(age.counter.is_paid(), True)
 
         ages = get_account_aging(account_config, [
-            JournalEntry(4, 'SALARY', 0, 3000, dt, '', '1'),
-            JournalEntry(1, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(2, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(3, 'SALARY', 2000, 0, dt, '', '1'),
-        ], 'SALARY', dt)
+            JournalEntry(4, 'SAVINGS_BANK', 0, 3000, dt, '', '1'),
+            JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(3, 'SAVINGS_BANK', 2000, 0, dt, '', '1'),
+        ], 'SAVINGS_BANK', dt)
         self.assertEqual(len(ages), 3)
         self.assertEqual(ages[0].counter.is_paid(), True)
         self.assertEqual(ages[1].counter.is_paid(), True)
@@ -69,11 +69,11 @@ class TestAging(TestCase):
         self.assertEqual(ages[2].counter.get_balance(), 1000)
 
         ages = get_account_aging(account_config, [
-            JournalEntry(1, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(2, 'SALARY', 1000, 0, dt, '', '1'),
-            JournalEntry(3, 'SALARY', 0, 3000, dt, '', '1'),
-            JournalEntry(4, 'SALARY', 2000, 0, dt, '', '1'),
-        ], 'SALARY', dt)
+            JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
+            JournalEntry(3, 'SAVINGS_BANK', 0, 3000, dt, '', '1'),
+            JournalEntry(4, 'SAVINGS_BANK', 2000, 0, dt, '', '1'),
+        ], 'SAVINGS_BANK', dt)
         self.assertEqual(len(ages), 3)
         self.assertEqual(ages[0].counter.is_paid(), True)
         self.assertEqual(ages[1].counter.is_paid(), True)
