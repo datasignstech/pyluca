@@ -1,9 +1,11 @@
+import json
 from datetime import datetime
 from unittest import TestCase
 
 from pyluca.account_config import AccountingConfig
+from pyluca.accountant import Accountant
 from pyluca.aging import get_account_aging
-from pyluca.journal import JournalEntry
+from pyluca.journal import JournalEntry, Journal
 
 account_config = AccountingConfig(dict={
     'account_types': {
@@ -25,7 +27,9 @@ account_config = AccountingConfig(dict={
         'SAVINGS_BANK': {'type': 'ASSET'},
         'MUTUAL_FUNDS': {'type': 'ASSET'},
         'LOANS': {'type': 'ASSET'},
-        'CAR_EMI': {'type': 'EXPENSE'}
+        'CAR_EMI': {'type': 'EXPENSE'},
+        'FREELANCING_INCOME': {'type': 'INCOME'},
+        'LOANS_PAYBACK': {'type': 'INCOME'}
     },
     'rules': {}
 })
@@ -75,3 +79,21 @@ class TestAging(TestCase):
         self.assertEqual(ages[1].counter.is_paid(), True)
         self.assertEqual(ages[2].counter.is_paid(), False)
         self.assertEqual(ages[2].counter.get_balance(), 1000)
+
+    def test_meta(self):
+        accountant = Accountant(Journal(), account_config, 'person1')
+        accountant.enter_journal('SAVINGS_BANK', 'FREELANCING_INCOME', 20000, datetime(2022, 4, 30), 'XYZ client')
+        accountant.enter_journal(
+            'LOANS', 'SAVINGS_BANK', 1000, datetime(2022, 5, 1),
+            f'Lend to Pramod ##{json.dumps({"due_date": "2022-5-5"})}##'
+        )
+        accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 300, datetime(2022, 5, 10), 'Payback 1')
+        accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 200, datetime(2022, 5, 15), 'Payback 2')
+        accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 500, datetime(2022, 5, 20), 'Payback 3')
+        ages = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 5, 25))
+        self.assertEqual(len(ages), 1)
+        self.assertEqual(ages[0].counter.is_paid(), True)
+        self.assertEqual(len(ages[0].counter.payments), 3)
+        due_meta = ages[0].meta['due_date'].split('-')
+        due_date = datetime(int(due_meta[0]), int(due_meta[1]), int(due_meta[2]))
+        self.assertEqual((ages[0].counter.get_paid_date() - due_date).days, 15)
