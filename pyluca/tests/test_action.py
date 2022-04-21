@@ -111,7 +111,7 @@ personal_fin_config = AccountingConfig(**{
                             'a': 'context.multiplier',
                             'b': 'balance.MUTUAL_FUNDS'
                         },
-                        'narration': 'Liquidate loans payback'
+                        'narration': 'Mutual fund P&L'
                     }
                 ]
             }
