@@ -28,3 +28,6 @@ class AccountingConfig(DictAble):
     account_types: Dict[str, AccountType] = DictValueField(AccountType, required=True)
     accounts: Dict[str, Account] = DictValueField(Account, required=True)
     rules: Dict[str, Rule] = DictValueField(Rule, required=True)
+
+    def get_account_names(self):
+        return self.accounts.keys()
