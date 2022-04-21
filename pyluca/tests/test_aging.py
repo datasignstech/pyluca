@@ -7,7 +7,7 @@ from pyluca.accountant import Accountant
 from pyluca.aging import get_account_aging
 from pyluca.journal import JournalEntry, Journal
 
-account_config = AccountingConfig(dict={
+account_config = AccountingConfig(**{
     'account_types': {
         'ASSET': {
             'balance_type': 'DEBIT'

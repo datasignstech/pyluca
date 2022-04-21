@@ -1,8 +1,6 @@
 from enum import Enum
-from typing import Dict
-
-from pydictable.core import DictAble
-from pydictable.field import StrField, DictValueField, EnumField
+from typing import Dict, List, Optional, Union
+from pydantic import BaseModel
 
 
 class BalanceType(Enum):
@@ -10,24 +8,50 @@ class BalanceType(Enum):
     DEBIT = 'DEBIT'
 
 
-class Account(DictAble):
-    type: str = StrField(required=True)
+class Account(BaseModel):
+    type: str
 
 
-class Rule(DictAble):
-    narration: str = StrField(required=True)
-    dr_account: str = StrField(required=True)
-    cr_account: str = StrField(required=True)
+class Rule(BaseModel):
+    narration: str
+    dr_account: str
+    cr_account: str
 
 
-class AccountType(DictAble):
-    balance_type: BalanceType = EnumField(BalanceType, required=True)
+class Operator(BaseModel):
+    operator: str
+    a: str
+    b: Optional[str]
 
 
-class AccountingConfig(DictAble):
-    account_types: Dict[str, AccountType] = DictValueField(AccountType, required=True)
-    accounts: Dict[str, Account] = DictValueField(Account, required=True)
-    rules: Dict[str, Rule] = DictValueField(Rule, required=True)
+class AccountType(BaseModel):
+    balance_type: BalanceType
+
+
+class Action(BaseModel):
+    type: Optional[str]
+    dr_account: Optional[str]
+    cr_account: Optional[str]
+    amount: Optional[str]
+    narration: Optional[str]
+    meta: Optional[Dict[str, str]]
+    iff: Optional[Union[Operator, str]]
+
+
+class EventAction(BaseModel):
+    narration: Optional[str]
+    actions: List[Action]
+
+
+class ActionsConfig(BaseModel):
+    on_event: Dict[str, EventAction]
+
+
+class AccountingConfig(BaseModel):
+    account_types: Dict[str, AccountType]
+    accounts: Dict[str, Account]
+    rules: Dict[str, Rule]
+    actions_config: Optional[ActionsConfig]
 
     def get_account_names(self):
         return self.accounts.keys()
