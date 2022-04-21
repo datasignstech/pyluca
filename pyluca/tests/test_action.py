@@ -59,7 +59,7 @@ personal_fin_config = AccountingConfig(**{
             'LendEvent': {
                 'actions': [
                     {
-                        'iff': {'operator': '!', 'a': 'risky'},
+                        'iff': {'type': '!', 'a': 'risky'},
                         'dr_account': 'LOANS',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': 'amount',

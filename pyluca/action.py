@@ -19,7 +19,7 @@ _OPERATOR_CONFIG = {
 
 
 def _apply_operator(operator: Operator, event: Event, accountant: Accountant):
-    return _OPERATOR_CONFIG[operator.operator](
+    return _OPERATOR_CONFIG[operator.type](
         _get_param(operator.a, event, accountant),
         _get_param(operator.b, event, accountant)
     )

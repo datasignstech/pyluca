@@ -19,7 +19,7 @@ class Rule(BaseModel):
 
 
 class Operator(BaseModel):
-    operator: str
+    type: str
     a: str
     b: Optional[str]
 
