@@ -31,7 +31,8 @@ personal_fin_config = AccountingConfig(**{
         'CAR_EMI': {'type': 'EXPENSE'},
         'FREELANCING_INCOME': {'type': 'INCOME'},
         'LOANS_PAYBACK': {'type': 'ASSET'},
-        'RISKY_LOANS': {'type': 'ASSET'}
+        'RISKY_LOANS': {'type': 'ASSET'},
+        'MUTUAL_FUNDS_PNL': {'type': 'INCOME'}
     },
     'rules': {},
     'actions_config': {
@@ -90,12 +91,26 @@ personal_fin_config = AccountingConfig(**{
                     }
                 ]
             },
-            'LiquidLoanRepayments': {
+            'LiquidLoanRepaymentsEvent': {
                 'actions': [
                     {
                         'dr_account': 'SAVINGS_BANK',
                         'cr_account': 'LOANS_PAYBACK',
                         'amount': 'balance.LOANS_PAYBACK',
+                        'narration': 'Liquidate loans payback'
+                    }
+                ]
+            },
+            'MFProfitEvent': {
+                'actions': [
+                    {
+                        'dr_account': 'MUTUAL_FUNDS',
+                        'cr_account': 'MUTUAL_FUNDS_PNL',
+                        'amount': {
+                            'type': '*',
+                            'a': 'context.multiplier',
+                            'b': 'balance.MUTUAL_FUNDS'
+                        },
                         'narration': 'Liquidate loans payback'
                     }
                 ]
@@ -146,7 +161,11 @@ class ClearLoansEvent(Event):
     pass
 
 
-class LiquidLoanRepayments(Event):
+class LiquidLoanRepaymentsEvent(Event):
+    pass
+
+
+class MFProfitEvent(Event):
     pass
 
 
@@ -220,8 +239,21 @@ class TestAction(TestCase):
         self.assertEqual(ledger.get_account_balance('RISKY_LOANS'), 5000)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 0)
 
-        apply(LiquidLoanRepayments('7', datetime(2022, 4, 29), datetime(2022, 4, 29)), accountant)
+        apply(LiquidLoanRepaymentsEvent('7', datetime(2022, 4, 29), datetime(2022, 4, 29)), accountant)
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('LOANS'), 0)
         self.assertEqual(ledger.get_account_balance('LOANS_PAYBACK'), 0)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 5000)
+
+    def test_context(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            SalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21)),
+            InvestMFEvent('2', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21)),
+            MFProfitEvent('3', datetime(2022, 4, 30), datetime(2022, 4, 30))
+        ]
+        for e in events:
+            apply(e, accountant, {'multiplier': .18})
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS'), 20000 * 1.18)
+        self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS_PNL'), 20000 * .18)
