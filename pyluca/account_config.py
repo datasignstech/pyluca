@@ -32,7 +32,7 @@ class Action(BaseModel):
     type: Optional[str]
     dr_account: Optional[str]
     cr_account: Optional[str]
-    amount: Optional[str]
+    amount: Optional[Union[str, Operator]]
     narration: Optional[str]
     meta: Optional[Dict[str, str]]
     iff: Optional[Union[Operator, str]]

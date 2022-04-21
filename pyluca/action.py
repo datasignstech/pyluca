@@ -18,26 +18,29 @@ _OPERATOR_CONFIG = {
 }
 
 
-def _apply_operator(operator: Operator, event: Event, accountant: Accountant):
+def _apply_operator(operator: Operator, event: Event, accountant: Accountant, context: dict):
     return _OPERATOR_CONFIG[operator.type](
-        _get_param(operator.a, event, accountant),
-        _get_param(operator.b, event, accountant)
+        _get_param(operator.a, event, accountant, context),
+        _get_param(operator.b, event, accountant, context)
     )
 
 
 def _get_param(
         key: Union[str, list, Operator],
         event: Event,
-        accountant: Accountant
+        accountant: Accountant,
+        context: dict
 ):
     if key is None:
         return None
     if type(key) in [int, float]:
         return key
     if isinstance(key, Operator):
-        return _apply_operator(key, event, accountant)
+        return _apply_operator(key, event, accountant, context)
     if key.startswith('str.'):
         return key.replace('str.', '')
+    if key.startswith('context.'):
+        return context[key.replace('context.', '')]
     if key.startswith('balance.'):
         return Ledger(accountant.journal, accountant.config)\
             .get_account_balance(key.replace('balance.', ''))
@@ -46,10 +49,10 @@ def _get_param(
     raise NotImplementedError(f'param {key} not implemented')
 
 
-def _get_narration(action: Action, event: Event, accountant: Accountant):
+def _get_narration(action: Action, event: Event, accountant: Accountant, context: dict):
     narration = action.narration
     if action.meta:
-        meta = {k: _get_param(v, event, accountant) for k, v in action.meta.items()}
+        meta = {k: _get_param(v, event, accountant, context) for k, v in action.meta.items()}
         narration = f'{narration} ##{json.dumps(meta)}##'
     return narration
 
@@ -57,22 +60,24 @@ def _get_narration(action: Action, event: Event, accountant: Accountant):
 def _apply_action(
         action: Action,
         event: Event,
-        accountant: Accountant
+        accountant: Accountant,
+        context: dict
 ):
-    if action.iff and not _get_param(action.iff, event, accountant):
+    if action.iff and not _get_param(action.iff, event, accountant, context):
         return
     action_type = action.type if action.type else 'je'
     if action_type == 'je':
         accountant.enter_journal(
             action.dr_account,
             action.cr_account,
-            _get_param(action.amount, event, accountant),
+            _get_param(action.amount, event, accountant, context),
             event.date,
-            _get_narration(action, event, accountant)
+            _get_narration(action, event, accountant, context)
         )
 
 
-def apply(event: Event, accountant: Accountant):
+def apply(event: Event, accountant: Accountant, context: dict = None):
+    context = context if context else {}
     event_config = accountant.config.actions_config.on_event[event.__class__.__name__]
     for action in event_config.actions:
-        _apply_action(action, event, accountant)
+        _apply_action(action, event, accountant, context)
