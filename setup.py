@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='pyluca',
-    version='0.0.1',
+    version='0.0.2',
     author='datasignstech',
     author_email='pramod.kumar@datasignstech.com',
     description='Double entry accounting system',
