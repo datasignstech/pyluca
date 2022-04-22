@@ -4,7 +4,7 @@ setuptools.setup(
     name='pyluca',
     version='0.0.3',
     author='datasignstech',
-    author_email='pramod.kumar@datasignstech.com',
+    author_email='tech+opensource@datasignstech.com',
     description='Double entry accounting system',
     url='https://github.com/datasignstech/pyluca',
     packages=['pyluca'],
