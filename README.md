@@ -14,4 +14,7 @@ On a high level, you just need to do following steps to start using it.
 **You need to have basic accounting/bookkeeping knowledge to set up the configuration**
 
 Checkout out `demo/` for examples. You can event checkout `pyluca/tests` for advance usages.
-
+1. Basic accounting configuration - `demo/personal_finance.py`
+2. Creating an accountant and passing journal entries - `demo/personal_finance.py`
+3. Creating events and configuring actions - `demo/personal_finance.py`
+4. Ledger usage and as of any "time" - `demo/personal_finance.py` 
