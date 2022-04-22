@@ -10,4 +10,8 @@ On a high level, you just need to do following steps to start using it.
 2. Pass journal entries
 3. Get balances
 
+## Example
+**You need to have basic accounting/bookkeeping knowledge to set up the configuration**
+
+Checkout out `demo/` for examples. You can event checkout `pyluca/tests` for advance usages.
 
