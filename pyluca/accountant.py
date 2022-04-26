@@ -31,8 +31,8 @@ class Accountant:
             narration = f'{narration} ##{json.dumps(meta)}##'
         if amount > 0:
             self.enter_journal(
-                rule.dr_account,
-                rule.cr_account,
+                rule['dr_account'],
+                rule['cr_account'],
                 amount,
                 date,
                 narration

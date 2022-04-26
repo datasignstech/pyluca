@@ -29,7 +29,7 @@ def reconcile_ledger(
                - Ledger(closed_accountant.journal, config).get_account_balance(acct_name)
         if diff == 0:
             continue
-        if config['account_types'][config['accounts'][acct_name].type].balance_type == BalanceType.DEBIT.value:
+        if config['account_types'][config['accounts'][acct_name]['type']]['balance_type'] == BalanceType.DEBIT.value:
             closed_accountant.adjust(acct_name, 'RECONCILE_CONTROL', diff, date)
         else:
             closed_accountant.adjust('RECONCILE_CONTROL', acct_name, diff, date)
