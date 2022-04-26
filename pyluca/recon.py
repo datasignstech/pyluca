@@ -1,12 +1,12 @@
 import datetime
-from pyluca.account_config import AccountingConfig, BalanceType
+from pyluca.account_config import BalanceType
 from pyluca.accountant import Accountant
 from pyluca.journal import Journal
 from pyluca.ledger import Ledger
 
 
-def _is_matching(config: AccountingConfig, journal_1: Journal, journal_2: Journal) -> bool:
-    for acct_name in config.accounts.keys():
+def _is_matching(config: dict, journal_1: Journal, journal_2: Journal) -> bool:
+    for acct_name in config['accounts'].keys():
         if Ledger(journal_1, config).get_account_balance(acct_name) \
                 != Ledger(journal_2, config).get_account_balance(acct_name):
             return False
@@ -18,18 +18,18 @@ def _is_matching(config: AccountingConfig, journal_1: Journal, journal_2: Journa
 
 
 def reconcile_ledger(
-        config: AccountingConfig,
+        config: dict,
         closed_accountant: Accountant,
         current_accountant: Accountant,
         date: datetime.datetime
 ):
     assert _is_matching(config, closed_accountant.journal, current_accountant.journal) is False
-    for acct_name in [a for a in config.accounts.keys() if a not in ['RECONCILE_CONTROL']]:
+    for acct_name in [a for a in config['accounts'].keys() if a not in ['RECONCILE_CONTROL']]:
         diff = Ledger(current_accountant.journal, config).get_account_balance(acct_name) \
                - Ledger(closed_accountant.journal, config).get_account_balance(acct_name)
         if diff == 0:
             continue
-        if config.account_types[config.accounts[acct_name].type].balance_type == BalanceType.DEBIT:
+        if config['account_types'][config['accounts'][acct_name].type].balance_type == BalanceType.DEBIT.value:
             closed_accountant.adjust(acct_name, 'RECONCILE_CONTROL', diff, date)
         else:
             closed_accountant.adjust('RECONCILE_CONTROL', acct_name, diff, date)

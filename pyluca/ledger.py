@@ -1,13 +1,12 @@
 import pandas as pd
-
-from pyluca.account_config import AccountingConfig, BalanceType
+from pyluca.account_config import BalanceType
 from pyluca.aging import get_account_aging
 from pyluca.balances import add_account_balance
 from pyluca.journal import Journal
 
 
 class Ledger:
-    def __init__(self, journal: Journal, config: AccountingConfig):
+    def __init__(self, journal: Journal, config: dict):
         self.journal = journal
         self.config = config
 
@@ -18,8 +17,8 @@ class Ledger:
         return sum([j.cr_amount for j in self.journal.entries if j.account == account])
 
     def get_account_balance(self, account: str):
-        assert self.config.accounts[account].type in self.config.account_types
-        if self.config.account_types[self.config.accounts[account].type].balance_type == BalanceType.DEBIT:
+        assert self.config['accounts'][account]['type'] in self.config['account_types']
+        if self.config['account_types'][self.config['accounts'][account]['type']]['balance_type'] == BalanceType.DEBIT.value:
             return self.get_account_dr(account) - self.get_account_cr(account)
         return self.get_account_cr(account) - self.get_account_dr(account)
 
@@ -34,6 +33,6 @@ class Ledger:
 
     def get_balance_sheet(self):
         df = self.get_df()
-        for acct_name in self.config.get_account_names():
+        for acct_name in self.config['accounts'].keys():
             df = self.add_account_balance(acct_name, df)
         return df
