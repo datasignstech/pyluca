@@ -1,14 +1,12 @@
 from datetime import datetime
 from unittest import TestCase
-
-from pyluca.account_config import AccountingConfig
 from pyluca.accountant import Accountant
 from pyluca.action import apply
 from pyluca.event import Event
 from pyluca.journal import Journal
 from pyluca.ledger import Ledger
 
-personal_fin_config = AccountingConfig(**{
+personal_fin_config = {
     'account_types': {
         'ASSET': {
             'balance_type': 'DEBIT'
@@ -117,7 +115,7 @@ personal_fin_config = AccountingConfig(**{
             }
         }
     }
-})
+}
 
 
 class AmountEvent(Event):
@@ -171,12 +169,7 @@ class MFProfitEvent(Event):
 
 class TestAction(TestCase):
     def test_config(self):
-        AccountingConfig(**{
-            'account_types': {},
-            'accounts': {},
-            'rules': {}
-        })
-        config = AccountingConfig(**{
+        config = {
             'account_types': {},
             'accounts': {},
             'rules': {},
@@ -194,13 +187,13 @@ class TestAction(TestCase):
                     }
                 }
             }
-        })
-        action = config.actions_config.on_event['Salary'].actions[0]
-        self.assertEqual(action.type, None)
-        self.assertEqual(action.dr_account, 'X')
-        self.assertEqual(action.cr_account, 'Y')
-        self.assertEqual(action.amount, 'amount')
-        self.assertEqual(action.narration, 'test')
+        }
+        action = config['actions_config']['on_event']['Salary']['actions'][0]
+        self.assertEqual(action.get('type'), None)
+        self.assertEqual(action['dr_account'], 'X')
+        self.assertEqual(action['cr_account'], 'Y')
+        self.assertEqual(action['amount'], 'amount')
+        self.assertEqual(action['narration'], 'test')
 
     def test_base(self):
         accountant = Accountant(Journal(), personal_fin_config, '1')

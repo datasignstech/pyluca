@@ -1,13 +1,11 @@
 import json
 from datetime import datetime
 from unittest import TestCase
-
-from pyluca.account_config import AccountingConfig
 from pyluca.accountant import Accountant
 from pyluca.aging import get_account_aging
 from pyluca.journal import JournalEntry, Journal
 
-account_config = AccountingConfig(**{
+account_config = {
     'account_types': {
         'ASSET': {
             'balance_type': 'DEBIT'
@@ -32,7 +30,7 @@ account_config = AccountingConfig(**{
         'LOANS_PAYBACK': {'type': 'INCOME'}
     },
     'rules': {}
-})
+}
 
 
 class TestAging(TestCase):

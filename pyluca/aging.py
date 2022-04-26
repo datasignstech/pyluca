@@ -2,7 +2,7 @@ import json
 import re
 from datetime import datetime
 from typing import NamedTuple, List, Optional
-from pyluca.account_config import AccountingConfig, BalanceType
+from pyluca.account_config import BalanceType
 from pyluca.journal import JournalEntry
 from pyluca.amount_counter import AmountCounter
 
@@ -35,7 +35,7 @@ def _pay_counters(positive_entries: List[PositiveEntry], amount: float, date: da
 
 
 def get_account_aging(
-        config: AccountingConfig,
+        config: dict,
         entries: List[JournalEntry],
         account: str,
         as_of: datetime
@@ -43,11 +43,11 @@ def get_account_aging(
     filtered_entries = [e for e in entries if e.date <= as_of and e.account == account]
     positive_entries: List[PositiveEntry] = []
     active_counter_idx, excess_amount = 0, 0
-    account_type = config.accounts[account].type
+    account_type = config['accounts'][account]['type']
     for entry in filtered_entries:
-        account_balance_type = config.account_types[account_type].balance_type
-        positive_amount = entry.cr_amount if account_balance_type == BalanceType.CREDIT else entry.dr_amount
-        negative_amount = entry.dr_amount if account_balance_type == BalanceType.CREDIT else entry.cr_amount
+        account_balance_type = config['account_types'][account_type]['balance_type']
+        positive_amount = entry.cr_amount if account_balance_type == BalanceType.CREDIT.value else entry.dr_amount
+        negative_amount = entry.dr_amount if account_balance_type == BalanceType.CREDIT.value else entry.cr_amount
         if positive_amount > 0:
             meta = re.match('.*##(.*)##.*', entry.narration)
             positive_entries.append(

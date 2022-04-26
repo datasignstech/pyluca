@@ -1,4 +1,3 @@
-from pyluca.account_config import AccountingConfig
 from pyluca.accountant import Accountant
 from pyluca.action import apply
 from pyluca.event import Event
@@ -11,7 +10,7 @@ from datetime import datetime
 Basic usage
 '''
 
-config = AccountingConfig(**{
+config = {
     'account_types': {
         'ASSET': {
             'balance_type': 'DEBIT'
@@ -34,7 +33,7 @@ config = AccountingConfig(**{
         'CAR_EMI': {'type': 'EXPENSE'}
     },
     'rules': {}
-})
+}
 
 accountant = Accountant(Journal(), config, 'person1')
 accountant.enter_journal('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30), 'March salary')
@@ -128,7 +127,7 @@ class CollectionEvent(AmountEvent):
 
 
 config_dict = {
-    **config.dict(),  # Just extending above config
+    **config,  # Just extending above config
     'actions_config': {
         'on_event': {
             'SalaryEvent': {
@@ -181,7 +180,7 @@ events = [
     LendEvent('lend-1', 5000, datetime(2022, 5, 4), datetime(2022, 5, 4))
 ]
 
-accountant = Accountant(Journal(), AccountingConfig(**config_dict), 'person-1')
+accountant = Accountant(Journal(), config_dict, 'person-1')
 for event in events:
     apply(event, accountant)
 

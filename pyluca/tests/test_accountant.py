@@ -32,7 +32,7 @@ class TestAccountant(TestCase):
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2000)
 
         bal, ledger, acct_type_bal = {}, Ledger(accountant.journal, accountant.config), defaultdict(int)
-        for acct_name, acct in account_config.accounts.items():
+        for acct_name, acct in account_config['accounts'].items():
             bal[acct_name] = ledger.get_account_balance(acct_name)
-            acct_type_bal[acct.type] += bal[acct_name]
+            acct_type_bal[acct['type']] += bal[acct_name]
         self.assertEqual(acct_type_bal['ASSET'], acct_type_bal['INCOME'] - acct_type_bal['EXPENSE'])
