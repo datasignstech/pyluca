@@ -26,7 +26,7 @@ class Accountant:
 
     def record(self, rule: str, amount: float, date: datetime.datetime, note: str = '', meta: dict = None):
         rule = self.config['rules'][rule]
-        narration = f'{rule.narration} {note}'
+        narration = f'{rule["narration"]} {note}'
         if meta:
             narration = f'{narration} ##{json.dumps(meta)}##'
         if amount > 0:
