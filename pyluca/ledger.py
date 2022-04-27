@@ -1,7 +1,5 @@
-import pandas as pd
 from pyluca.account_config import BalanceType
 from pyluca.aging import get_account_aging
-from pyluca.balances import add_account_balance
 from pyluca.journal import Journal
 
 
@@ -22,17 +20,6 @@ class Ledger:
             return self.get_account_dr(account) - self.get_account_cr(account)
         return self.get_account_cr(account) - self.get_account_dr(account)
 
-    def get_df(self) -> pd.DataFrame:
-        return pd.DataFrame([j.__dict__ for j in self.journal.entries])
-
     def get_aging(self, account: str):
         return get_account_aging(self.config, self.journal.entries, account, self.journal.entries[-1].date)
 
-    def add_account_balance(self, account: str, df: pd.DataFrame):
-        return add_account_balance(self.config, df, account)
-
-    def get_balance_sheet(self):
-        df = self.get_df()
-        for acct_name in self.config['accounts'].keys():
-            df = self.add_account_balance(acct_name, df)
-        return df
