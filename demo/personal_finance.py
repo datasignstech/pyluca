@@ -52,42 +52,6 @@ ledger = Ledger(accountant.journal, accountant.config)
 assert ledger.get_account_balance('LOANS') == 1000
 assert ledger.get_account_balance('SAVINGS_BANK') == 4000
 
-# get pandas dataframe
-ledger.get_df()
-'''
-   sl_no       account  dr_amount  ...       date                 narration      key
-0      0  SAVINGS_BANK      20000  ... 2022-04-30              March salary  person1
-1      1        SALARY          0  ... 2022-04-30              March salary  person1
-2      2  MUTUAL_FUNDS      10000  ... 2022-05-01  Invest in NIFTY 50 Index  person1
-3      3  SAVINGS_BANK          0  ... 2022-05-01  Invest in NIFTY 50 Index  person1
-4      4       CAR_EMI       5000  ... 2022-05-05                   5th EMI  person1
-5      5  SAVINGS_BANK          0  ... 2022-05-05                   5th EMI  person1
-6      6         LOANS       3000  ... 2022-05-05            Lend to Kalyan  person1
-7      7  SAVINGS_BANK          0  ... 2022-05-05            Lend to Kalyan  person1
-8      8  SAVINGS_BANK       2000  ... 2022-05-15           Partial payback  person1
-9      9         LOANS          0  ... 2022-05-15           Partial payback  person1
-
-[10 rows x 7 columns]
-'''
-
-# get the balance sheet
-ledger.get_balance_sheet()
-'''
-   sl_no       account  dr_amount  ...  MUTUAL_FUNDS LOANS CAR_EMI
-0      0  SAVINGS_BANK      20000  ...             0     0       0
-1      1        SALARY          0  ...             0     0       0
-2      2  MUTUAL_FUNDS      10000  ...         10000     0       0
-3      3  SAVINGS_BANK          0  ...         10000     0       0
-4      4       CAR_EMI       5000  ...         10000     0    5000
-5      5  SAVINGS_BANK          0  ...         10000     0    5000
-6      6         LOANS       3000  ...         10000  3000    5000
-7      7  SAVINGS_BANK          0  ...         10000  3000    5000
-8      8  SAVINGS_BANK       2000  ...         10000  3000    5000
-9      9         LOANS          0  ...         10000  1000    5000
-
-[10 rows x 12 columns]
-'''
-
 
 '''
 Events & Actions
