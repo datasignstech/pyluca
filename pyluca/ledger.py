@@ -32,27 +32,20 @@ class Ledger:
             return self.get_account_dr(account) - self.get_account_cr(account)
         return self.get_account_cr(account) - self.get_account_dr(account)
 
-    def get_ledger(self) -> List[LedgerDict]:
-        return [_entry.__dict__ for _entry in self.journal.entries]
-
     def get_aging(self, account: str):
         return get_account_aging(self.config, self.journal.entries, account, self.journal.entries[-1].date)
 
-    def add_account_balance(self, account: str, ledger: List[LedgerDict]):
-        account_type = self.config['accounts'][account]['type']
-        positive_col, negative_col = 'cr_amount', 'dr_amount'
-        if self.config['account_types'][account_type]['balance_type'] == BalanceType.DEBIT.value:
-            positive_col, negative_col = 'dr_amount', 'cr_amount'
-        balance = 0
-        for row in ledger:
-            if row['account'] == account:
-                balance += row[positive_col]
-                balance -= row[negative_col]
-            row[account] = balance
-        return ledger
-
     def get_balance_sheet(self):
-        ledger = self.get_ledger()
+        ledger = [_entry.__dict__ for _entry in self.journal.entries]
         for acct_name in self.config['accounts'].keys():
-            ledger = self.add_account_balance(acct_name, ledger)
+            account_type = self.config['accounts'][acct_name]['type']
+            positive_col, negative_col = 'cr_amount', 'dr_amount'
+            if self.config['account_types'][account_type]['balance_type'] == BalanceType.DEBIT.value:
+                positive_col, negative_col = 'dr_amount', 'cr_amount'
+            balance = 0
+            for row in ledger:
+                if row['account'] == acct_name:
+                    balance += row[positive_col]
+                    balance -= row[negative_col]
+                row[acct_name] = balance
         return ledger

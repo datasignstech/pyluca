@@ -16,7 +16,6 @@ class TestAccountant(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000)
         self.assertEqual(ledger.get_account_balance('SALARY'), 20000)
-        self.assertEqual(len(ledger.get_ledger()), 2)
 
         accountant.enter_journal('MUTUAL_FUNDS', 'SAVINGS_BANK', 10000, datetime(2022, 5, 1), 'ELSS')
         ledger = Ledger(accountant.journal, accountant.config)
