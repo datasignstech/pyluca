@@ -1,18 +1,6 @@
-from datetime import datetime
-from typing import List, TypedDict
 from pyluca.account_config import BalanceType
 from pyluca.aging import get_account_aging
 from pyluca.journal import Journal
-
-
-class LedgerDict(TypedDict):
-    key: str
-    sl_no: int
-    account: str
-    dr_amount: float
-    cr_amount: float
-    date: datetime
-    narration: str
 
 
 class Ledger:
