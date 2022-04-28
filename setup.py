@@ -13,3 +13,4 @@ setuptools.setup(
     long_description_content_type='text/plain',
     install_requires=[r for r in open('requirements.txt', 'r').read().split('\n') if r]
 )
+
