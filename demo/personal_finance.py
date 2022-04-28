@@ -52,24 +52,6 @@ ledger = Ledger(accountant.journal, accountant.config)
 assert ledger.get_account_balance('LOANS') == 1000
 assert ledger.get_account_balance('SAVINGS_BANK') == 4000
 
-ledger.get_ledger()
-'''
-[
-    {'sl_no': 0, 'account': 'SAVINGS_BANK', 'dr_amount': 20000, 'cr_amount': 0, 'date': datetime.datetime(2022, 4, 30, 0, 0), 'narration': 'March salary', 'key': 'person1'}, 
-    {'sl_no': 1, 'account': 'SALARY', 'dr_amount': 0, 'cr_amount': 20000, 'date': datetime.datetime(2022, 4, 30, 0, 0), 'narration': 'March salary', 'key': 'person1'}, 
-    {'sl_no': 2, 'account': 'MUTUAL_FUNDS', 'dr_amount': 10000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 1, 0, 0), 'narration': 'Invest in NIFTY 50 Index', 'key': 'person1'}, 
-    {'sl_no': 3, 'account': 'SAVINGS_BANK', 'dr_amount': 0, 'cr_amount': 10000, 'date': datetime.datetime(2022, 5, 1, 0, 0), 'narration': 'Invest in NIFTY 50 Index', 'key': 'person1'}, 
-    {'sl_no': 4, 'account': 'CAR_EMI', 'dr_amount': 5000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': '5th EMI', 'key': 'person1'}, 
-    {'sl_no': 5, 'account': 'SAVINGS_BANK', 'dr_amount': 0, 'cr_amount': 5000, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': '5th EMI', 'key': 'person1'}, 
-    {'sl_no': 6, 'account': 'LOANS', 'dr_amount': 3000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': 'Lend to Kalyan', 'key': 'person1'}, 
-    {'sl_no': 7, 'account': 'SAVINGS_BANK', 'dr_amount': 0, 'cr_amount': 3000, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': 'Lend to Kalyan', 'key': 'person1'}, 
-    {'sl_no': 8, 'account': 'SAVINGS_BANK', 'dr_amount': 2000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 15, 0, 0), 'narration': 'Partial payback', 'key': 'person1'}, 
-    {'sl_no': 9, 'account': 'LOANS', 'dr_amount': 0, 'cr_amount': 2000, 'date': datetime.datetime(2022, 5, 15, 0, 0), 'narration': 'Partial payback', 'key': 'person1'}
-]
-
-[10 rows x 7 columns]
-'''
-
 # get the balance sheet
 ledger.get_balance_sheet()
 '''
