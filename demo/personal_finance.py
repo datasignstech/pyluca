@@ -30,7 +30,10 @@ config = {
         'SAVINGS_BANK': {'type': 'ASSET'},
         'MUTUAL_FUNDS': {'type': 'ASSET'},
         'LOANS': {'type': 'ASSET'},
-        'CAR_EMI': {'type': 'EXPENSE'}
+        'CAR_EMI': {'type': 'EXPENSE'},
+        'CHARGE_DUE': {'type': 'ASSET'},
+        'CHARGE_INCOME': {'type': 'INCOME'},
+        'GST': {'type': 'LIABILITY'},
     },
     'rules': {}
 }
@@ -109,9 +112,44 @@ class CollectionEvent(AmountEvent):
     pass
 
 
+class ChargeEvent(Event):
+    def __init__(
+            self,
+            event_id: str,
+            charge: float,
+            gst: float,
+            date: datetime,
+            created_date: datetime,
+            created_by: str = None
+    ):
+        self.charge = charge
+        self.gst = gst
+        super(ChargeEvent, self).__init__(event_id, date, created_date, created_by)
+
+
+class MFProcessingFeeEvent(ChargeEvent):
+    pass
+
+
 config_dict = {
     **config,  # Just extending above config
     'actions_config': {
+        "charge": {
+            "actions": [
+                {
+                    "dr_account": "CHARGE_DUE",
+                    "cr_account": "CHARGE_INCOME",
+                    "amount": "charge",
+                    "narration": "Charges"
+                },
+                {
+                    "dr_account": "CHARGE_DUE",
+                    "cr_account": "GST",
+                    "amount": "gst",
+                    "narration": "gst on charges"
+                }
+            ]
+        },
         'on_event': {
             'SalaryEvent': {
                 'actions': [
@@ -152,7 +190,19 @@ config_dict = {
                         'narration': 'Collection for the loan'
                     }
                 ]
-            }
+            },
+            'MFProcessingFeeEvent': {
+                'actions': [
+                    {
+                        "type": "action.charge",
+                        "params": {
+                            "amount": "charge",
+                            "gst": {"operator": "*", "a": "charge", "b": 0.18}
+                        },
+                        "narration": "processing fee on MF"
+                    }
+                ]
+            },
         }
     }
 }
@@ -160,17 +210,22 @@ config_dict = {
 events = [
     SalaryEvent('salary', 20000, datetime(2022, 4, 30), datetime(2022, 4, 30)),
     InvestMutualFundEvent('mf-1', 10000, datetime(2022, 5, 2), datetime(2022, 5, 2)),
+    MFProcessingFeeEvent('8', 200, 36, datetime(2022, 4, 30), datetime(2022, 4, 30)),
     LendEvent('lend-1', 5000, datetime(2022, 5, 4), datetime(2022, 5, 4))
 ]
 
 accountant = Accountant(Journal(), config_dict, 'person-1')
 for event in events:
-    apply(event, accountant)
+    apply(event, accountant, config_dict['actions_config'])
 
 ledger = Ledger(accountant.journal, accountant.config)
+
 assert ledger.get_account_balance('SALARY') == 20000
 assert ledger.get_account_balance('MUTUAL_FUNDS') == 10000
 assert ledger.get_account_balance('LOANS') == 5000
+assert ledger.get_account_balance('CHARGE_DUE') == 236
+assert ledger.get_account_balance('CHARGE_INCOME') == 200
+assert ledger.get_account_balance('GST') == 36
 
 events = [
     CollectionEvent('coll-1', 3000, datetime(2022, 5, 20), datetime(2022, 5, 20)),

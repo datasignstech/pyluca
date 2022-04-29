@@ -30,10 +30,29 @@ personal_fin_config = {
         'FREELANCING_INCOME': {'type': 'INCOME'},
         'LOANS_PAYBACK': {'type': 'ASSET'},
         'RISKY_LOANS': {'type': 'ASSET'},
-        'MUTUAL_FUNDS_PNL': {'type': 'INCOME'}
+        'MUTUAL_FUNDS_PNL': {'type': 'INCOME'},
+        'CHARGE_DUE': {'type': 'ASSET'},
+        'CHARGE_INCOME': {'type': 'INCOME'},
+        'GST': {'type': 'LIABILITY'},
     },
     'rules': {},
     'actions_config': {
+        "charge": {
+            "actions": [
+                {
+                    "dr_account": "CHARGE_DUE",
+                    "cr_account": "CHARGE_INCOME",
+                    "amount": "charge",
+                    "narration": "Charges"
+                },
+                {
+                    "dr_account": "CHARGE_DUE",
+                    "cr_account": "GST",
+                    "amount": "gst",
+                    "narration": "gst on charges"
+                }
+            ]
+        },
         'on_event': {
             'SalaryEvent': {
                 'actions': [
@@ -112,7 +131,19 @@ personal_fin_config = {
                         'narration': 'Mutual fund P&L'
                     }
                 ]
-            }
+            },
+            'MFProcessingFeeEvent': {
+                'actions': [
+                    {
+                        "type": "action.charge",
+                        "params": {
+                            "amount": "charge",
+                            "gst": {"operator": "*", "a": "charge", "b": 0.18}
+                        },
+                        "narration": "processing fee on MF"
+                    }
+                ]
+            },
         }
     }
 }
@@ -164,6 +195,25 @@ class LiquidLoanRepaymentsEvent(Event):
 
 
 class MFProfitEvent(Event):
+    pass
+
+
+class ChargeEvent(Event):
+    def __init__(
+            self,
+            event_id: str,
+            charge: float,
+            gst: float,
+            date: datetime,
+            created_date: datetime,
+            created_by: str = None
+    ):
+        self.charge = charge
+        self.gst = gst
+        super(ChargeEvent, self).__init__(event_id, date, created_date, created_by)
+
+
+class MFProcessingFeeEvent(ChargeEvent):
     pass
 
 
@@ -237,6 +287,16 @@ class TestAction(TestCase):
         self.assertEqual(ledger.get_account_balance('LOANS'), 0)
         self.assertEqual(ledger.get_account_balance('LOANS_PAYBACK'), 0)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 5000)
+
+        apply(
+            MFProcessingFeeEvent('8', 100, 18, datetime(2022, 4, 30), datetime(2022, 4, 30)),
+            accountant,
+            personal_fin_config['actions_config']
+        )
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('CHARGE_DUE'), 118)
+        self.assertEqual(ledger.get_account_balance('CHARGE_INCOME'), 100)
+        self.assertEqual(ledger.get_account_balance('GST'), 18)
 
     def test_context(self):
         accountant = Accountant(Journal(), personal_fin_config, '1')
