@@ -4,7 +4,6 @@ from pyluca.accountant import Accountant
 from pyluca.ledger import Ledger
 from pyluca.event import Event
 
-
 _OPERATOR_CONFIG = {
     '*': lambda a, b: a * b,
     '+': lambda a, b: a + b,
@@ -40,8 +39,7 @@ def _get_param(
     if key.startswith('context.'):
         return context[key.replace('context.', '')]
     if key.startswith('balance.'):
-        return Ledger(accountant.journal, accountant.config)\
-            .get_account_balance(key.replace('balance.', ''))
+        return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
     if hasattr(event, key):
         return event.__getattribute__(key)
     raise NotImplementedError(f'param {key} not implemented')
@@ -72,6 +70,9 @@ def _apply_action(
             event.date,
             _get_narration(action, event, accountant, context)
         )
+    elif action_type.startswith('action.'):
+        for action in context[action_type.replace('action.', '')]['actions']:
+            _apply_action(action, event, accountant, context)
 
 
 def apply(event: Event, accountant: Accountant, context: dict = None):

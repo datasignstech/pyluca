@@ -30,7 +30,10 @@ config = {
         'SAVINGS_BANK': {'type': 'ASSET'},
         'MUTUAL_FUNDS': {'type': 'ASSET'},
         'LOANS': {'type': 'ASSET'},
-        'CAR_EMI': {'type': 'EXPENSE'}
+        'CAR_EMI': {'type': 'EXPENSE'},
+        'CHARGE_DUE': {'type': 'ASSET'},
+        'CHARGE_INCOME': {'type': 'INCOME'},
+        'GST': {'type': 'LIABILITY'},
     },
     'rules': {}
 }
@@ -52,38 +55,21 @@ ledger = Ledger(accountant.journal, accountant.config)
 assert ledger.get_account_balance('LOANS') == 1000
 assert ledger.get_account_balance('SAVINGS_BANK') == 4000
 
-# get pandas dataframe
-ledger.get_df()
-'''
-   sl_no       account  dr_amount  ...       date                 narration      key
-0      0  SAVINGS_BANK      20000  ... 2022-04-30              March salary  person1
-1      1        SALARY          0  ... 2022-04-30              March salary  person1
-2      2  MUTUAL_FUNDS      10000  ... 2022-05-01  Invest in NIFTY 50 Index  person1
-3      3  SAVINGS_BANK          0  ... 2022-05-01  Invest in NIFTY 50 Index  person1
-4      4       CAR_EMI       5000  ... 2022-05-05                   5th EMI  person1
-5      5  SAVINGS_BANK          0  ... 2022-05-05                   5th EMI  person1
-6      6         LOANS       3000  ... 2022-05-05            Lend to Kalyan  person1
-7      7  SAVINGS_BANK          0  ... 2022-05-05            Lend to Kalyan  person1
-8      8  SAVINGS_BANK       2000  ... 2022-05-15           Partial payback  person1
-9      9         LOANS          0  ... 2022-05-15           Partial payback  person1
-
-[10 rows x 7 columns]
-'''
-
 # get the balance sheet
 ledger.get_balance_sheet()
 '''
-   sl_no       account  dr_amount  ...  MUTUAL_FUNDS LOANS CAR_EMI
-0      0  SAVINGS_BANK      20000  ...             0     0       0
-1      1        SALARY          0  ...             0     0       0
-2      2  MUTUAL_FUNDS      10000  ...         10000     0       0
-3      3  SAVINGS_BANK          0  ...         10000     0       0
-4      4       CAR_EMI       5000  ...         10000     0    5000
-5      5  SAVINGS_BANK          0  ...         10000     0    5000
-6      6         LOANS       3000  ...         10000  3000    5000
-7      7  SAVINGS_BANK          0  ...         10000  3000    5000
-8      8  SAVINGS_BANK       2000  ...         10000  3000    5000
-9      9         LOANS          0  ...         10000  1000    5000
+[
+    {'sl_no': 0, 'account': 'SAVINGS_BANK', 'dr_amount': 20000, 'cr_amount': 0, 'date': datetime.datetime(2022, 4, 30, 0, 0), 'narration': 'March salary', 'key': 'person1', 'SALARY': 0, 'SAVINGS_BANK': 20000, 'MUTUAL_FUNDS': 0, 'LOANS': 0, 'CAR_EMI': 0}, 
+    {'sl_no': 1, 'account': 'SALARY', 'dr_amount': 0, 'cr_amount': 20000, 'date': datetime.datetime(2022, 4, 30, 0, 0), 'narration': 'March salary', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 20000, 'MUTUAL_FUNDS': 0, 'LOANS': 0, 'CAR_EMI': 0}, 
+    {'sl_no': 2, 'account': 'MUTUAL_FUNDS', 'dr_amount': 10000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 1, 0, 0), 'narration': 'Invest in NIFTY 50 Index', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 20000, 'MUTUAL_FUNDS': 10000, 'LOANS': 0, 'CAR_EMI': 0}, 
+    {'sl_no': 3, 'account': 'SAVINGS_BANK', 'dr_amount': 0, 'cr_amount': 10000, 'date': datetime.datetime(2022, 5, 1, 0, 0), 'narration': 'Invest in NIFTY 50 Index', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 10000, 'MUTUAL_FUNDS': 10000, 'LOANS': 0, 'CAR_EMI': 0}, 
+    {'sl_no': 4, 'account': 'CAR_EMI', 'dr_amount': 5000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': '5th EMI', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 10000, 'MUTUAL_FUNDS': 10000, 'LOANS': 0, 'CAR_EMI': 5000}, 
+    {'sl_no': 5, 'account': 'SAVINGS_BANK', 'dr_amount': 0, 'cr_amount': 5000, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': '5th EMI', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 5000, 'MUTUAL_FUNDS': 10000, 'LOANS': 0, 'CAR_EMI': 5000}, 
+    {'sl_no': 6, 'account': 'LOANS', 'dr_amount': 3000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': 'Lend to Kalyan', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 5000, 'MUTUAL_FUNDS': 10000, 'LOANS': 3000, 'CAR_EMI': 5000}, 
+    {'sl_no': 7, 'account': 'SAVINGS_BANK', 'dr_amount': 0, 'cr_amount': 3000, 'date': datetime.datetime(2022, 5, 5, 0, 0), 'narration': 'Lend to Kalyan', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 2000, 'MUTUAL_FUNDS': 10000, 'LOANS': 3000, 'CAR_EMI': 5000}, 
+    {'sl_no': 8, 'account': 'SAVINGS_BANK', 'dr_amount': 2000, 'cr_amount': 0, 'date': datetime.datetime(2022, 5, 15, 0, 0), 'narration': 'Partial payback', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 4000, 'MUTUAL_FUNDS': 10000, 'LOANS': 3000, 'CAR_EMI': 5000}, 
+    {'sl_no': 9, 'account': 'LOANS', 'dr_amount': 0, 'cr_amount': 2000, 'date': datetime.datetime(2022, 5, 15, 0, 0), 'narration': 'Partial payback', 'key': 'person1', 'SALARY': 20000, 'SAVINGS_BANK': 4000, 'MUTUAL_FUNDS': 10000, 'LOANS': 1000, 'CAR_EMI': 5000}
+]
 
 [10 rows x 12 columns]
 '''
@@ -126,9 +112,44 @@ class CollectionEvent(AmountEvent):
     pass
 
 
+class ChargeEvent(Event):
+    def __init__(
+            self,
+            event_id: str,
+            charge: float,
+            gst: float,
+            date: datetime,
+            created_date: datetime,
+            created_by: str = None
+    ):
+        self.charge = charge
+        self.gst = gst
+        super(ChargeEvent, self).__init__(event_id, date, created_date, created_by)
+
+
+class MFProcessingFeeEvent(ChargeEvent):
+    pass
+
+
 config_dict = {
     **config,  # Just extending above config
     'actions_config': {
+        "charge": {
+            "actions": [
+                {
+                    "dr_account": "CHARGE_DUE",
+                    "cr_account": "CHARGE_INCOME",
+                    "amount": "charge",
+                    "narration": "Charges"
+                },
+                {
+                    "dr_account": "CHARGE_DUE",
+                    "cr_account": "GST",
+                    "amount": "gst",
+                    "narration": "gst on charges"
+                }
+            ]
+        },
         'on_event': {
             'SalaryEvent': {
                 'actions': [
@@ -169,7 +190,19 @@ config_dict = {
                         'narration': 'Collection for the loan'
                     }
                 ]
-            }
+            },
+            'MFProcessingFeeEvent': {
+                'actions': [
+                    {
+                        "type": "action.charge",
+                        "params": {
+                            "amount": "charge",
+                            "gst": {"operator": "*", "a": "charge", "b": 0.18}
+                        },
+                        "narration": "processing fee on MF"
+                    }
+                ]
+            },
         }
     }
 }
@@ -177,17 +210,22 @@ config_dict = {
 events = [
     SalaryEvent('salary', 20000, datetime(2022, 4, 30), datetime(2022, 4, 30)),
     InvestMutualFundEvent('mf-1', 10000, datetime(2022, 5, 2), datetime(2022, 5, 2)),
+    MFProcessingFeeEvent('8', 200, 36, datetime(2022, 4, 30), datetime(2022, 4, 30)),
     LendEvent('lend-1', 5000, datetime(2022, 5, 4), datetime(2022, 5, 4))
 ]
 
 accountant = Accountant(Journal(), config_dict, 'person-1')
 for event in events:
-    apply(event, accountant)
+    apply(event, accountant, config_dict['actions_config'])
 
 ledger = Ledger(accountant.journal, accountant.config)
+
 assert ledger.get_account_balance('SALARY') == 20000
 assert ledger.get_account_balance('MUTUAL_FUNDS') == 10000
 assert ledger.get_account_balance('LOANS') == 5000
+assert ledger.get_account_balance('CHARGE_DUE') == 236
+assert ledger.get_account_balance('CHARGE_INCOME') == 200
+assert ledger.get_account_balance('GST') == 36
 
 events = [
     CollectionEvent('coll-1', 3000, datetime(2022, 5, 20), datetime(2022, 5, 20)),
