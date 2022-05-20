@@ -30,10 +30,7 @@ config = {
         'SAVINGS_BANK': {'type': 'ASSET'},
         'MUTUAL_FUNDS': {'type': 'ASSET'},
         'LOANS': {'type': 'ASSET'},
-        'CAR_EMI': {'type': 'EXPENSE'},
-        'CHARGE_DUE': {'type': 'ASSET'},
-        'CHARGE_INCOME': {'type': 'INCOME'},
-        'GST': {'type': 'LIABILITY'},
+        'CAR_EMI': {'type': 'EXPENSE'}
     },
     'rules': {}
 }
@@ -69,6 +66,7 @@ ledger.get_df()
 7      7  SAVINGS_BANK          0  ... 2022-05-05            Lend to Kalyan  person1
 8      8  SAVINGS_BANK       2000  ... 2022-05-15           Partial payback  person1
 9      9         LOANS          0  ... 2022-05-15           Partial payback  person1
+
 [10 rows x 7 columns]
 '''
 
@@ -128,44 +126,9 @@ class CollectionEvent(AmountEvent):
     pass
 
 
-class ChargeEvent(Event):
-    def __init__(
-            self,
-            event_id: str,
-            charge: float,
-            gst: float,
-            date: datetime,
-            created_date: datetime,
-            created_by: str = None
-    ):
-        self.charge = charge
-        self.gst = gst
-        super(ChargeEvent, self).__init__(event_id, date, created_date, created_by)
-
-
-class MFProcessingFeeEvent(ChargeEvent):
-    pass
-
-
 config_dict = {
     **config,  # Just extending above config
     'actions_config': {
-        "charge": {
-            "actions": [
-                {
-                    "dr_account": "CHARGE_DUE",
-                    "cr_account": "CHARGE_INCOME",
-                    "amount": "charge",
-                    "narration": "Charges"
-                },
-                {
-                    "dr_account": "CHARGE_DUE",
-                    "cr_account": "GST",
-                    "amount": "gst",
-                    "narration": "gst on charges"
-                }
-            ]
-        },
         'on_event': {
             'SalaryEvent': {
                 'actions': [
