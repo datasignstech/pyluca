@@ -206,19 +206,7 @@ config_dict = {
                         'narration': 'Collection for the loan'
                     }
                 ]
-            },
-            'MFProcessingFeeEvent': {
-                'actions': [
-                    {
-                        "type": "action.charge",
-                        "params": {
-                            "amount": "charge",
-                            "gst": {"operator": "*", "a": "charge", "b": 0.18}
-                        },
-                        "narration": "processing fee on MF"
-                    }
-                ]
-            },
+            }
         }
     }
 }
@@ -226,22 +214,18 @@ config_dict = {
 events = [
     SalaryEvent('salary', 20000, datetime(2022, 4, 30), datetime(2022, 4, 30)),
     InvestMutualFundEvent('mf-1', 10000, datetime(2022, 5, 2), datetime(2022, 5, 2)),
-    MFProcessingFeeEvent('8', 200, 36, datetime(2022, 4, 30), datetime(2022, 4, 30)),
     LendEvent('lend-1', 5000, datetime(2022, 5, 4), datetime(2022, 5, 4))
 ]
 
 accountant = Accountant(Journal(), config_dict, 'person-1')
 for event in events:
-    apply(event, accountant, config_dict['actions_config'])
+    apply(event, accountant)
 
 ledger = Ledger(accountant.journal, accountant.config)
 
 assert ledger.get_account_balance('SALARY') == 20000
 assert ledger.get_account_balance('MUTUAL_FUNDS') == 10000
 assert ledger.get_account_balance('LOANS') == 5000
-assert ledger.get_account_balance('CHARGE_DUE') == 236
-assert ledger.get_account_balance('CHARGE_INCOME') == 200
-assert ledger.get_account_balance('GST') == 36
 
 events = [
     CollectionEvent('coll-1', 3000, datetime(2022, 5, 20), datetime(2022, 5, 20)),

@@ -31,27 +31,32 @@ personal_fin_config = {
         'LOANS_PAYBACK': {'type': 'ASSET'},
         'RISKY_LOANS': {'type': 'ASSET'},
         'MUTUAL_FUNDS_PNL': {'type': 'INCOME'},
-        'CHARGE_DUE': {'type': 'ASSET'},
-        'CHARGE_INCOME': {'type': 'INCOME'},
-        'GST': {'type': 'LIABILITY'},
+        'CHARITY': {'type': 'EXPENSE'},
+        'FIXED_DEPOSIT': {'type': 'ASSET'}
     },
     'rules': {},
     'actions_config': {
-        "charge": {
-            "actions": [
-                {
-                    "dr_account": "CHARGE_DUE",
-                    "cr_account": "CHARGE_INCOME",
-                    "amount": "charge",
-                    "narration": "Charges"
-                },
-                {
-                    "dr_account": "CHARGE_DUE",
-                    "cr_account": "GST",
-                    "amount": "gst",
-                    "narration": "gst on charges"
-                }
-            ]
+        'common_actions': {
+            'charity': {
+                'actions': [
+                    {
+                        'dr_account': 'CHARITY',
+                        'cr_account': 'SAVINGS_BANK',
+                        'amount': {'type': '*', 'a': 'amount', 'b': 0.01},
+                        'narration': 'Charges'
+                    }
+                ]
+            },
+            'fd': {
+                'actions': [
+                    {
+                        'dr_account': 'FIXED_DEPOSIT',
+                        'cr_account': 'SAVINGS_BANK',
+                        'amount': 'context.another_amount',
+                        'narration': 'Charges'
+                    }
+                ]
+            }
         },
         'on_event': {
             'SalaryEvent': {
@@ -132,18 +137,25 @@ personal_fin_config = {
                     }
                 ]
             },
-            'MFProcessingFeeEvent': {
+            'FreelancingSalaryEvent': {
                 'actions': [
                     {
-                        "type": "action.charge",
-                        "params": {
-                            "amount": "charge",
-                            "gst": {"operator": "*", "a": "charge", "b": 0.18}
-                        },
-                        "narration": "processing fee on MF"
+                        'type': 'action.charity'
+                    },
+                    {
+                        'dr_account': 'SAVINGS_BANK',
+                        'cr_account': 'SALARY',
+                        'amount': {'type': '*', 'a': 'amount', 'b': 0.9},
+                        'narration': 'Salary'
+                    },
+                    {
+                        'type': 'action.fd',
+                        'context': {
+                            'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09}
+                        }
                     }
                 ]
-            },
+            }
         }
     }
 }
@@ -198,22 +210,7 @@ class MFProfitEvent(Event):
     pass
 
 
-class ChargeEvent(Event):
-    def __init__(
-            self,
-            event_id: str,
-            charge: float,
-            gst: float,
-            date: datetime,
-            created_date: datetime,
-            created_by: str = None
-    ):
-        self.charge = charge
-        self.gst = gst
-        super(ChargeEvent, self).__init__(event_id, date, created_date, created_by)
-
-
-class MFProcessingFeeEvent(ChargeEvent):
+class FreelancingSalaryEvent(AmountEvent):
     pass
 
 
@@ -288,16 +285,6 @@ class TestAction(TestCase):
         self.assertEqual(ledger.get_account_balance('LOANS_PAYBACK'), 0)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 5000)
 
-        apply(
-            MFProcessingFeeEvent('8', 100, 18, datetime(2022, 4, 30), datetime(2022, 4, 30)),
-            accountant,
-            personal_fin_config['actions_config']
-        )
-        ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('CHARGE_DUE'), 118)
-        self.assertEqual(ledger.get_account_balance('CHARGE_INCOME'), 100)
-        self.assertEqual(ledger.get_account_balance('GST'), 18)
-
     def test_context(self):
         accountant = Accountant(Journal(), personal_fin_config, '1')
         events = [
@@ -310,3 +297,15 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS'), 20000 * 1.18)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS_PNL'), 20000 * .18)
+
+    def test_common_action(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            FreelancingSalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('CHARITY'), 200)
+        self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 1800)
+        self.assertEqual(ledger.get_account_balance('SALARY'), 20000 - 200 - 1800)
