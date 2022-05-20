@@ -38,7 +38,7 @@ def _get_param(
         return key.replace('str.', '')
     if key.startswith('context.'):
         next_key = key.replace('context.', '')
-        return _get_param(context[next_key], event, accountant, context[next_key])
+        return _get_param(context[next_key], event, accountant, context)
     if key.startswith('balance.'):
         return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
     if hasattr(event, key):
