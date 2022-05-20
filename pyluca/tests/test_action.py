@@ -43,7 +43,7 @@ personal_fin_config = {
                         'dr_account': 'CHARITY',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': {'type': '*', 'a': 'amount', 'b': 0.01},
-                        'narration': 'Charges'
+                        'narration': 'Give charity'
                     }
                 ]
             },
@@ -53,7 +53,7 @@ personal_fin_config = {
                         'dr_account': 'FIXED_DEPOSIT',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': 'context.another_amount',
-                        'narration': 'Charges'
+                        'narration': 'Put in fixed deposit'
                     }
                 ]
             }
@@ -140,13 +140,13 @@ personal_fin_config = {
             'FreelancingSalaryEvent': {
                 'actions': [
                     {
-                        'type': 'action.charity'
-                    },
-                    {
                         'dr_account': 'SAVINGS_BANK',
                         'cr_account': 'SALARY',
-                        'amount': {'type': '*', 'a': 'amount', 'b': 0.9},
+                        'amount': 'amount',
                         'narration': 'Salary'
+                    },
+                    {
+                        'type': 'action.charity'
                     },
                     {
                         'type': 'action.fd',
@@ -308,4 +308,4 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('CHARITY'), 200)
         self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 1800)
-        self.assertEqual(ledger.get_account_balance('SALARY'), 20000 - 200 - 1800)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000 - 200 - 1800)
