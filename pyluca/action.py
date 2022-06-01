@@ -4,7 +4,6 @@ from pyluca.accountant import Accountant
 from pyluca.ledger import Ledger
 from pyluca.event import Event
 
-
 _OPERATOR_CONFIG = {
     '*': lambda a, b: a * b,
     '+': lambda a, b: a + b,
@@ -38,10 +37,10 @@ def _get_param(
     if key.startswith('str.'):
         return key.replace('str.', '')
     if key.startswith('context.'):
-        return context[key.replace('context.', '')]
+        next_key = key.replace('context.', '')
+        return _get_param(context[next_key], event, accountant, context)
     if key.startswith('balance.'):
-        return Ledger(accountant.journal, accountant.config)\
-            .get_account_balance(key.replace('balance.', ''))
+        return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
     if hasattr(event, key):
         return event.__getattribute__(key)
     raise NotImplementedError(f'param {key} not implemented')
@@ -59,7 +58,8 @@ def _apply_action(
         action: dict,
         event: Event,
         accountant: Accountant,
-        context: dict
+        context: dict,
+        common_actions: dict
 ):
     if action.get('iff') and not _get_param(action['iff'], event, accountant, context):
         return
@@ -72,10 +72,14 @@ def _apply_action(
             event.date,
             _get_narration(action, event, accountant, context)
         )
+    elif action_type.startswith('action.'):
+        for sub_action in common_actions[action_type.replace('action.', '')]['actions']:
+            _apply_action(sub_action, event, accountant, {**context, **action.get('context', {})}, common_actions)
 
 
 def apply(event: Event, accountant: Accountant, context: dict = None):
     context = context if context else {}
     event_config = accountant.config['actions_config']['on_event'][event.__class__.__name__]
+    common_actions = accountant.config['actions_config'].get('common_actions', {})
     for action in event_config['actions']:
-        _apply_action(action, event, accountant, context)
+        _apply_action(action, event, accountant, context, common_actions)

@@ -30,10 +30,34 @@ personal_fin_config = {
         'FREELANCING_INCOME': {'type': 'INCOME'},
         'LOANS_PAYBACK': {'type': 'ASSET'},
         'RISKY_LOANS': {'type': 'ASSET'},
-        'MUTUAL_FUNDS_PNL': {'type': 'INCOME'}
+        'MUTUAL_FUNDS_PNL': {'type': 'INCOME'},
+        'CHARITY': {'type': 'EXPENSE'},
+        'FIXED_DEPOSIT': {'type': 'ASSET'}
     },
     'rules': {},
     'actions_config': {
+        'common_actions': {
+            'charity': {
+                'actions': [
+                    {
+                        'dr_account': 'CHARITY',
+                        'cr_account': 'SAVINGS_BANK',
+                        'amount': {'type': '*', 'a': 'amount', 'b': 0.01},
+                        'narration': 'Give charity'
+                    }
+                ]
+            },
+            'fd': {
+                'actions': [
+                    {
+                        'dr_account': 'FIXED_DEPOSIT',
+                        'cr_account': 'SAVINGS_BANK',
+                        'amount': 'context.another_amount',
+                        'narration': 'Put in fixed deposit'
+                    }
+                ]
+            }
+        },
         'on_event': {
             'SalaryEvent': {
                 'actions': [
@@ -112,6 +136,25 @@ personal_fin_config = {
                         'narration': 'Mutual fund P&L'
                     }
                 ]
+            },
+            'FreelancingSalaryEvent': {
+                'actions': [
+                    {
+                        'dr_account': 'SAVINGS_BANK',
+                        'cr_account': 'SALARY',
+                        'amount': 'amount',
+                        'narration': 'Salary'
+                    },
+                    {
+                        'type': 'action.charity'
+                    },
+                    {
+                        'type': 'action.fd',
+                        'context': {
+                            'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09}
+                        }
+                    }
+                ]
             }
         }
     }
@@ -164,6 +207,10 @@ class LiquidLoanRepaymentsEvent(Event):
 
 
 class MFProfitEvent(Event):
+    pass
+
+
+class FreelancingSalaryEvent(AmountEvent):
     pass
 
 
@@ -250,3 +297,15 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS'), 20000 * 1.18)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS_PNL'), 20000 * .18)
+
+    def test_common_action(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            FreelancingSalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('CHARITY'), 200)
+        self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 1800)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000 - 200 - 1800)
