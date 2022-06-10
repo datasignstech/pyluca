@@ -311,7 +311,6 @@ class TestAction(TestCase):
         for e in events:
             apply(e, accountant)
         ledger = Ledger(accountant.journal, accountant.config)
-        print(ledger.get_df().to_string())
         self.assertEqual(ledger.get_account_balance('CHARITY'), 200)
         self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 1800)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000 - 200 - 1800)
