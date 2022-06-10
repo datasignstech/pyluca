@@ -43,7 +43,7 @@ personal_fin_config = {
                         'dr_account': 'CHARITY',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': {'type': '*', 'a': 'amount', 'b': 0.01},
-                        'narration': 'Give charity to {context["to"]} on {context["date"]}'
+                        'narration': 'Give charity to {context.to} on {context.date}'
                     }
                 ]
             },
@@ -53,7 +53,7 @@ personal_fin_config = {
                         'dr_account': 'FIXED_DEPOSIT',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': 'context.another_amount',
-                        'narration': 'Put in fixed deposit for {context["sub_narration"]}'
+                        'narration': 'Put in fixed deposit for {context.sub_narration}'
                     }
                 ]
             }
@@ -149,8 +149,7 @@ personal_fin_config = {
                         'type': 'action.charity',
                         'context': {
                             'to': 'TATA Trusts',
-                            'date': '10/05/2022',
-
+                            'date': '10/05/2022'
                         }
                     },
                     {
@@ -312,6 +311,7 @@ class TestAction(TestCase):
         for e in events:
             apply(e, accountant)
         ledger = Ledger(accountant.journal, accountant.config)
+        print(ledger.get_df().to_string())
         self.assertEqual(ledger.get_account_balance('CHARITY'), 200)
         self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 1800)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000 - 200 - 1800)
