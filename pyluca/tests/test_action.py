@@ -43,7 +43,7 @@ personal_fin_config = {
                         'dr_account': 'CHARITY',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': {'type': '*', 'a': 'amount', 'b': 0.01},
-                        'narration': 'Give charity'
+                        'narration': 'Give charity to {context["to"]} on {context["date"]}'
                     }
                 ]
             },
@@ -53,7 +53,7 @@ personal_fin_config = {
                         'dr_account': 'FIXED_DEPOSIT',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': 'context.another_amount',
-                        'narration': 'Put in fixed deposit for {}'
+                        'narration': 'Put in fixed deposit for {context["sub_narration"]}'
                     }
                 ]
             }
@@ -146,7 +146,12 @@ personal_fin_config = {
                         'narration': 'Salary'
                     },
                     {
-                        'type': 'action.charity'
+                        'type': 'action.charity',
+                        'context': {
+                            'to': 'TATA Trusts',
+                            'date': '10/05/2022',
+
+                        }
                     },
                     {
                         'type': 'action.fd',
