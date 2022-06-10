@@ -53,7 +53,7 @@ personal_fin_config = {
                         'dr_account': 'FIXED_DEPOSIT',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': 'context.another_amount',
-                        'narration': 'Put in fixed deposit'
+                        'narration': 'Put in fixed deposit for {}'
                     }
                 ]
             }
@@ -151,7 +151,8 @@ personal_fin_config = {
                     {
                         'type': 'action.fd',
                         'context': {
-                            'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09}
+                            'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09},
+                            'sub_narration': 'Freelancing salary'
                         }
                     }
                 ]

@@ -47,7 +47,7 @@ def _get_param(
 
 
 def _get_narration(action: dict, event: Event, accountant: Accountant, context: dict):
-    narration = action['narration']
+    narration = action['narration'].format(context.get('sub_narration'))
     if action.get('meta'):
         meta = {k: _get_param(v, event, accountant, context) for k, v in action['meta'].items()}
         narration = f'{narration} ##{json.dumps(meta)}##'
