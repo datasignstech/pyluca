@@ -148,15 +148,15 @@ personal_fin_config = {
                     {
                         'type': 'action.charity',
                         'context': {
-                            'to': 'TATA Trusts',
-                            'date': '10/05/2022'
+                            'to': 'log:TATA Trusts',
+                            'date': 'log:10/05/2022'
                         }
                     },
                     {
                         'type': 'action.fd',
                         'context': {
                             'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09},
-                            'sub_narration': 'Freelancing salary'
+                            'sub_narration': 'log:Freelancing salary'
                         }
                     }
                 ]
