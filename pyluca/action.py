@@ -44,8 +44,6 @@ def _get_param(
         return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
     if hasattr(event, key):
         return event.__getattribute__(key)
-    if key.startswith('log:'):
-        return key.replace('log:', '')
     raise NotImplementedError(f'param {key} not implemented')
 
 
