@@ -43,7 +43,7 @@ personal_fin_config = {
                         'dr_account': 'CHARITY',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': {'type': '*', 'a': 'amount', 'b': 0.01},
-                        'narration': 'Give charity'
+                        'narration': 'Give charity to {context.to} on {context.date}'
                     }
                 ]
             },
@@ -53,7 +53,7 @@ personal_fin_config = {
                         'dr_account': 'FIXED_DEPOSIT',
                         'cr_account': 'SAVINGS_BANK',
                         'amount': 'context.another_amount',
-                        'narration': 'Put in fixed deposit'
+                        'narration': 'Put in fixed deposit for {context.sub_narration}'
                     }
                 ]
             }
@@ -146,12 +146,17 @@ personal_fin_config = {
                         'narration': 'Salary'
                     },
                     {
-                        'type': 'action.charity'
+                        'type': 'action.charity',
+                        'context': {
+                            'to': 'str.TATA Trusts',
+                            'date': 'str.10/05/2022'
+                        }
                     },
                     {
                         'type': 'action.fd',
                         'context': {
-                            'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09}
+                            'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09},
+                            'sub_narration': 'str.Freelancing salary'
                         }
                     }
                 ]
@@ -309,3 +314,16 @@ class TestAction(TestCase):
         self.assertEqual(ledger.get_account_balance('CHARITY'), 200)
         self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 1800)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000 - 200 - 1800)
+
+    def test_sub_narration(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            FreelancingSalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
+        ]
+        for e in events:
+            apply(e, accountant)
+        for je in Ledger(accountant.journal, accountant.config).journal.entries:
+            if je.account == 'CHARITY':
+                self.assertEqual(je.narration, 'Give charity to TATA Trusts on 10/05/2022')
+            if je.account == 'FIXED_DEPOSIT':
+                self.assertEqual(je.narration, 'Put in fixed deposit for Freelancing salary')

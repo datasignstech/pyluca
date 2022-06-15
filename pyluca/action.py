@@ -1,3 +1,4 @@
+import re
 import json
 from typing import Union
 from pyluca.accountant import Accountant
@@ -46,8 +47,17 @@ def _get_param(
     raise NotImplementedError(f'param {key} not implemented')
 
 
+def _parse_narration(narration: str, event: Event, accountant: Accountant, context: dict):
+    matches = re.findall("\{([^}]+)\}", narration)
+    if matches:
+        for match in matches:
+            narration = re.sub(match, _get_param(match, event, accountant, context), narration)
+        narration = re.sub(r'[{}]', '', narration)
+    return narration
+
+
 def _get_narration(action: dict, event: Event, accountant: Accountant, context: dict):
-    narration = action['narration']
+    narration = _parse_narration(action['narration'], event, accountant, context)
     if action.get('meta'):
         meta = {k: _get_param(v, event, accountant, context) for k, v in action['meta'].items()}
         narration = f'{narration} ##{json.dumps(meta)}##'
