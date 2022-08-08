@@ -1,6 +1,15 @@
 import datetime
 import json
+from decimal import Decimal
 from pyluca.journal import Journal, JournalEntry
+
+
+def _get_rounded_value(val: float):
+    _TOLERANCE_PRECISION_COUNT = 5
+    precision_count = abs(Decimal(val).as_tuple().exponent)
+    if precision_count > _TOLERANCE_PRECISION_COUNT:
+        return round(val)
+    return val
 
 
 class Accountant:
@@ -17,6 +26,7 @@ class Accountant:
             date: datetime.datetime,
             narration: str
     ):
+        amount = _get_rounded_value(amount)
         if amount == 0:
             return
         self.journal.entries.append(
