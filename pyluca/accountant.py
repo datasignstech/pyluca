@@ -8,7 +8,7 @@ def _get_rounded_value(val: float):
     _TOLERANCE_PRECISION_COUNT = 5
     precision_count = abs(Decimal(val).as_tuple().exponent)
     if precision_count > _TOLERANCE_PRECISION_COUNT:
-        return round(val)
+        return round(val, 2)
     return val
 
 
