@@ -1,19 +1,8 @@
-from decimal import Decimal, ROUND_UP
-
-
-PRECISION_ROUND_OFF_DECIMAL_POINTS = 5
-PRECISION_IS_PAID_DECIMAL_POINTS = 3
-
-
-def round_off_amount(amount: float):
-    max_precision = 10**PRECISION_ROUND_OFF_DECIMAL_POINTS
-    if amount - (int((amount * max_precision)) / max_precision) > 0:
-        return float(Decimal(amount).quantize(Decimal('.' + str(int(max_precision))[::-1]), rounding=ROUND_UP))
-    return amount
+PRECISION_ZERO = 3
 
 
 def zeroed(amount: float):
-    max_float = (1 / (10**PRECISION_IS_PAID_DECIMAL_POINTS))
+    max_float = (1 / (10 ** PRECISION_ZERO))
     min_float = -1 * max_float
     if min_float < amount < max_float:
         return 0

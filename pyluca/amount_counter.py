@@ -2,7 +2,7 @@ from datetime import datetime
 from abc import abstractmethod
 from typing import List, Optional, Tuple
 
-from pyluca.round_off import PRECISION_IS_PAID_DECIMAL_POINTS, zeroed
+from pyluca.round_off import zeroed
 
 
 class AccountPayment:

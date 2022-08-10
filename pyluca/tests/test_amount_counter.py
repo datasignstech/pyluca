@@ -33,11 +33,6 @@ class TestAmountCounter(TestCase):
         self.assertEqual(counter.get_paid_date(), datetime(2022, 4, 30))
 
     def test_floating_precision(self):
-        try:
-            AmountCounter(1e-6)
-            raise ValueError('AmountCounter should not be created with 1e-6')
-        except AssertionError:
-            pass
         ac = AmountCounter(100 + 1e-8)
         ac.pay(100, datetime(2022, 8, 10))
         self.assertTrue(ac.is_paid())
