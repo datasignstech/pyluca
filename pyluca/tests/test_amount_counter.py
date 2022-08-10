@@ -28,6 +28,4 @@ class TestAmountCounter(TestCase):
         self.assertEqual(len(counter.payments), 1)
         self.assertEqual(counter.payments[0].amount, 33.3)
         self.assertEqual(counter.payments[0].date, datetime(2022, 4, 20))
-        self.assertEqual(counter.get_paid_date(), None)
         self.assertAlmostEqual(counter.pay(1000, datetime(2022, 4, 30))[1], 33.3)
-        self.assertEqual(counter.get_paid_date(), datetime(2022, 4, 30))

@@ -94,4 +94,4 @@ class TestAging(TestCase):
         self.assertEqual(len(ages[0].counter.payments), 3)
         due_meta = ages[0].meta['due_date'].split('-')
         due_date = datetime(int(due_meta[0]), int(due_meta[1]), int(due_meta[2]))
-        self.assertEqual((ages[0].counter.get_paid_date() - due_date).days, 15)
+        self.assertEqual((ages[0].counter.payments[-1].date - due_date).days, 15)

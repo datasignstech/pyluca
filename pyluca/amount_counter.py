@@ -26,7 +26,6 @@ class AmountCounterInterface:
 
 class AmountCounter(AmountCounterInterface):
     def __init__(self, total_amount: float):
-        assert total_amount > 0, 'Cannot initiate AmountCounter with <= 0 amount'
         self.total_amount = total_amount
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
@@ -50,11 +49,6 @@ class AmountCounter(AmountCounterInterface):
 
     def is_paid(self):
         return abs(self.get_balance()) < TOLERANCE_FLOATING
-
-    def get_paid_date(self) -> Optional[datetime]:
-        if self.is_paid():
-            return self.payments[len(self.payments) - 1].date
-        return None
 
     def get_paid_amount(self):
         return self.paid_amount
