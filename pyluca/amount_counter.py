@@ -2,8 +2,6 @@ from datetime import datetime
 from abc import abstractmethod
 from typing import List, Optional, Tuple
 
-from pyluca.round_off import zeroed
-
 
 class AccountPayment:
     def __init__(self, amount: float, date: datetime):
@@ -29,9 +27,6 @@ class AmountCounter(AmountCounterInterface):
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
 
-    def add(self, amount: float):
-        self.total_amount += amount
-
     def pay(self, amount: float, date: datetime):
         if amount < 0:
             raise ValueError('Pay amount should not be less than 0')
@@ -44,15 +39,16 @@ class AmountCounter(AmountCounterInterface):
         return None, amount
 
     def get_balance(self):
-        return zeroed(self.total_amount - self.paid_amount)
+        return self.total_amount - self.paid_amount
 
-    def is_paid(self):
-        return abs(self.get_balance()) == 0
 
-    def get_paid_date(self) -> Optional[datetime]:
-        if self.is_paid():
-            return self.payments[len(self.payments) - 1].date
-        return None
+def is_amount_counter_paid(counter: AmountCounter):
+    return abs(counter.get_balance()) < 1e-3
 
-    def get_paid_amount(self):
-        return self.paid_amount
+
+def get_amount_counter_paid_date(counter: AmountCounter, due_date: datetime = None) -> Optional[datetime]:
+    if is_amount_counter_paid(counter):
+        if len(counter.payments) == 0:
+            return due_date
+        return counter.payments[len(counter.payments) - 1].date
+    return None

@@ -2,6 +2,7 @@ from datetime import datetime
 from unittest import TestCase
 from pyluca.accountant import Accountant
 from pyluca.action import apply
+from pyluca.amount_counter import get_amount_counter_paid_date
 from pyluca.event import Event
 from pyluca.journal import Journal
 from pyluca.ledger import Ledger
@@ -275,7 +276,7 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('LOANS'), 0)
         ages = ledger.get_aging('LOANS')
-        self.assertEqual(ages[0].counter.get_paid_date(), datetime(2022, 4, 25))
+        self.assertEqual(get_amount_counter_paid_date(ages[0].counter), datetime(2022, 4, 25))
 
         event = LendEvent('5', 5000, '2022-6-21', datetime(2022, 4, 26), datetime(2022, 4, 26), risky=True)
         apply(event, accountant)

@@ -4,8 +4,7 @@ from datetime import datetime
 from typing import NamedTuple, List, Optional
 from pyluca.account_config import BalanceType
 from pyluca.journal import JournalEntry
-from pyluca.amount_counter import AmountCounter
-from pyluca.round_off import zeroed
+from pyluca.amount_counter import AmountCounter, is_amount_counter_paid
 
 
 class AccountAge(NamedTuple):
@@ -27,8 +26,9 @@ def _pay_counters(positive_entries: List[PositiveEntry], amount: float, date: da
         return 0
     rem_amount, cur_idx = amount, 0
     while rem_amount > 0 and cur_idx < len(positive_entries):
-        _, rem_amount = positive_entries[cur_idx].counter.pay(rem_amount, date)
-        if positive_entries[cur_idx].counter.is_paid():
+        if not is_amount_counter_paid(positive_entries[cur_idx].counter):
+            _, rem_amount = positive_entries[cur_idx].counter.pay(rem_amount, date)
+        if is_amount_counter_paid(positive_entries[cur_idx].counter):
             cur_idx += 1
         else:
             break
@@ -49,7 +49,7 @@ def get_account_aging(
         account_balance_type = config['account_types'][account_type]['balance_type']
         positive_amount = entry.cr_amount if account_balance_type == BalanceType.CREDIT.value else entry.dr_amount
         negative_amount = entry.dr_amount if account_balance_type == BalanceType.CREDIT.value else entry.cr_amount
-        if zeroed(positive_amount) > 0:
+        if positive_amount:
             meta = re.match('.*##(.*)##.*', entry.narration)
             positive_entries.append(
                 PositiveEntry(

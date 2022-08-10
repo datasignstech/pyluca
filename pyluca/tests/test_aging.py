@@ -3,6 +3,7 @@ from datetime import datetime
 from unittest import TestCase
 from pyluca.accountant import Accountant
 from pyluca.aging import get_account_aging
+from pyluca.amount_counter import is_amount_counter_paid, get_amount_counter_paid_date
 from pyluca.journal import JournalEntry, Journal
 
 account_config = {
@@ -43,7 +44,7 @@ class TestAging(TestCase):
             JournalEntry(4, 'SAVINGS_BANK', 0, 4000, dt, '', '1'),
         ], 'SAVINGS_BANK', dt)
         for age in ages:
-            self.assertEqual(age.counter.is_paid(), True)
+            self.assertEqual(is_amount_counter_paid(age.counter), True)
 
         ages = get_account_aging(account_config, [
             JournalEntry(4, 'SAVINGS_BANK', 0, 4000, dt, '', '1'),
@@ -52,7 +53,7 @@ class TestAging(TestCase):
             JournalEntry(3, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
         ], 'SAVINGS_BANK', dt)
         for age in ages:
-            self.assertEqual(age.counter.is_paid(), True)
+            self.assertEqual(is_amount_counter_paid(age.counter), True)
 
         ages = get_account_aging(account_config, [
             JournalEntry(4, 'SAVINGS_BANK', 0, 3000, dt, '', '1'),
@@ -61,9 +62,9 @@ class TestAging(TestCase):
             JournalEntry(3, 'SAVINGS_BANK', 2000, 0, dt, '', '1'),
         ], 'SAVINGS_BANK', dt)
         self.assertEqual(len(ages), 3)
-        self.assertEqual(ages[0].counter.is_paid(), True)
-        self.assertEqual(ages[1].counter.is_paid(), True)
-        self.assertEqual(ages[2].counter.is_paid(), False)
+        self.assertEqual(is_amount_counter_paid(ages[0].counter), True)
+        self.assertEqual(is_amount_counter_paid(ages[1].counter), True)
+        self.assertEqual(is_amount_counter_paid(ages[2].counter), False)
         self.assertEqual(ages[2].counter.get_balance(), 1000)
 
         ages = get_account_aging(account_config, [
@@ -73,9 +74,9 @@ class TestAging(TestCase):
             JournalEntry(4, 'SAVINGS_BANK', 2000, 0, dt, '', '1'),
         ], 'SAVINGS_BANK', dt)
         self.assertEqual(len(ages), 3)
-        self.assertEqual(ages[0].counter.is_paid(), True)
-        self.assertEqual(ages[1].counter.is_paid(), True)
-        self.assertEqual(ages[2].counter.is_paid(), False)
+        self.assertEqual(is_amount_counter_paid(ages[0].counter), True)
+        self.assertEqual(is_amount_counter_paid(ages[1].counter), True)
+        self.assertEqual(is_amount_counter_paid(ages[2].counter), False)
         self.assertEqual(ages[2].counter.get_balance(), 1000)
 
     def test_meta(self):
@@ -90,8 +91,8 @@ class TestAging(TestCase):
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 500, datetime(2022, 5, 20), 'Payback 3')
         ages = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 5, 25))
         self.assertEqual(len(ages), 1)
-        self.assertEqual(ages[0].counter.is_paid(), True)
+        self.assertEqual(is_amount_counter_paid(ages[0].counter), True)
         self.assertEqual(len(ages[0].counter.payments), 3)
         due_meta = ages[0].meta['due_date'].split('-')
         due_date = datetime(int(due_meta[0]), int(due_meta[1]), int(due_meta[2]))
-        self.assertEqual((ages[0].counter.get_paid_date() - due_date).days, 15)
+        self.assertEqual((get_amount_counter_paid_date(ages[0].counter) - due_date).days, 15)
