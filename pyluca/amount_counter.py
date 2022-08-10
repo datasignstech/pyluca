@@ -2,8 +2,7 @@ from datetime import datetime
 from abc import abstractmethod
 from typing import List, Optional, Tuple
 
-
-FLOATING_PRECISION = 1e-6
+from pyluca.round_off import PRECISION_IS_PAID_DECIMAL_POINTS, zeroed
 
 
 class AccountPayment:
@@ -26,7 +25,8 @@ class AmountCounterInterface:
 
 class AmountCounter(AmountCounterInterface):
     def __init__(self, total_amount: float):
-        assert total_amount > FLOATING_PRECISION, f'Cannot initiate AmountCounter with <= {FLOATING_PRECISION} amount'
+        assert total_amount > PRECISION_IS_PAID_DECIMAL_POINTS, \
+            f'Cannot initiate AmountCounter with <= {PRECISION_IS_PAID_DECIMAL_POINTS} amount'
         self.total_amount = total_amount
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
@@ -46,8 +46,7 @@ class AmountCounter(AmountCounterInterface):
         return None, amount
 
     def get_balance(self):
-        diff = self.total_amount - self.paid_amount
-        return diff if diff > FLOATING_PRECISION else 0
+        return zeroed(self.total_amount - self.paid_amount)
 
     def is_paid(self):
         return abs(self.get_balance()) == 0

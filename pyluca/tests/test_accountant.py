@@ -41,10 +41,10 @@ class TestAccountant(TestCase):
         accountant = Accountant(Journal(), account_config, 'person1')
         accountant.enter_journal('SAVINGS_BANK', 'SALARY', 0.000000001, datetime(2022, 8, 10), 'Salary')
         ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 1e-5)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 1e-7)
 
         accountant.enter_journal('SAVINGS_BANK', 'SALARY', 1000, datetime(2022, 8, 10), 'Salary')
         accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 299.39322123349934, datetime(2022, 8, 10), 'EMI')
         ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 299.39323)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 1000 + 1e-5 - 299.39323)
+        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 299.3932213)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 1000 + 1e-7 - 299.3932213)

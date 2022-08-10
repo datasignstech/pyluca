@@ -1,15 +1,8 @@
 import datetime
 import json
-from decimal import Decimal, ROUND_UP
 
 from pyluca.journal import Journal, JournalEntry
-
-
-def round_off_amount(amount: float):
-    max_precision = 1e4
-    if amount - (int((amount * max_precision)) / max_precision) > 0:
-        return float(Decimal(amount).quantize(Decimal('.' + str(int(max_precision))[::-1]), rounding=ROUND_UP))
-    return amount
+from pyluca.round_off import round_off_amount
 
 
 class Accountant:
