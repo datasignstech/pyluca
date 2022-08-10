@@ -37,7 +37,7 @@ class AmountCounter(AmountCounterInterface):
     def pay(self, amount: float, date: datetime):
         if amount < 0:
             raise ValueError('Pay amount should not be less than 0')
-        possible_pay_amount = min(self.total_amount - self.paid_amount, amount)
+        possible_pay_amount = min(self.get_balance(), amount)
         if possible_pay_amount > 0:
             payment = AccountPayment(possible_pay_amount, date)
             self.payments.append(payment)
