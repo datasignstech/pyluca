@@ -25,8 +25,8 @@ class AmountCounterInterface:
 
 class AmountCounter(AmountCounterInterface):
     def __init__(self, total_amount: float):
-        assert total_amount > PRECISION_IS_PAID_DECIMAL_POINTS, \
-            f'Cannot initiate AmountCounter with <= {PRECISION_IS_PAID_DECIMAL_POINTS} amount'
+        assert zeroed(total_amount) != 0, \
+            f'Cannot initiate AmountCounter with {total_amount} amount. Precision error'
         self.total_amount = total_amount
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
