@@ -2,7 +2,7 @@ from decimal import Decimal, ROUND_UP
 
 
 PRECISION_ROUND_OFF_DECIMAL_POINTS = 5
-PRECISION_IS_PAID_DECIMAL_POINTS = 6
+PRECISION_IS_PAID_DECIMAL_POINTS = 3
 
 
 def round_off_amount(amount: float):

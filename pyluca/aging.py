@@ -5,6 +5,7 @@ from typing import NamedTuple, List, Optional
 from pyluca.account_config import BalanceType
 from pyluca.journal import JournalEntry
 from pyluca.amount_counter import AmountCounter
+from pyluca.round_off import zeroed
 
 
 class AccountAge(NamedTuple):
@@ -48,7 +49,7 @@ def get_account_aging(
         account_balance_type = config['account_types'][account_type]['balance_type']
         positive_amount = entry.cr_amount if account_balance_type == BalanceType.CREDIT.value else entry.dr_amount
         negative_amount = entry.dr_amount if account_balance_type == BalanceType.CREDIT.value else entry.cr_amount
-        if positive_amount > 0:
+        if zeroed(positive_amount) > 0:
             meta = re.match('.*##(.*)##.*', entry.narration)
             positive_entries.append(
                 PositiveEntry(

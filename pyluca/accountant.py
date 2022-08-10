@@ -2,7 +2,6 @@ import datetime
 import json
 
 from pyluca.journal import Journal, JournalEntry
-from pyluca.round_off import round_off_amount
 
 
 class Accountant:
@@ -19,7 +18,6 @@ class Accountant:
             date: datetime.datetime,
             narration: str
     ):
-        amount = round_off_amount(amount)
         if amount == 0:
             return
         self.journal.entries.append(

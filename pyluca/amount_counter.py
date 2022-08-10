@@ -25,8 +25,6 @@ class AmountCounterInterface:
 
 class AmountCounter(AmountCounterInterface):
     def __init__(self, total_amount: float):
-        assert zeroed(total_amount) != 0, \
-            f'Cannot initiate AmountCounter with {total_amount} amount. Precision error'
         self.total_amount = total_amount
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
