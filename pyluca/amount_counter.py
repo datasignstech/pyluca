@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import List, Optional, Tuple
 
 
-FLOATING_PRECESSION = 1e-6
+FLOATING_PRECISION = 1e-6
 
 
 class AccountPayment:
@@ -26,7 +26,7 @@ class AmountCounterInterface:
 
 class AmountCounter(AmountCounterInterface):
     def __init__(self, total_amount: float):
-        assert total_amount > FLOATING_PRECESSION, f'Cannot initiate AmountCounter with <= {FLOATING_PRECESSION} amount'
+        assert total_amount > FLOATING_PRECISION, f'Cannot initiate AmountCounter with <= {FLOATING_PRECISION} amount'
         self.total_amount = total_amount
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
@@ -47,7 +47,7 @@ class AmountCounter(AmountCounterInterface):
 
     def get_balance(self):
         diff = self.total_amount - self.paid_amount
-        return diff if diff > FLOATING_PRECESSION else 0
+        return diff if diff > FLOATING_PRECISION else 0
 
     def is_paid(self):
         return abs(self.get_balance()) == 0
