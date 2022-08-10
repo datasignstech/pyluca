@@ -275,7 +275,7 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('LOANS'), 0)
         ages = ledger.get_aging('LOANS')
-        self.assertEqual(ages[0].counter.get_paid_date(), datetime(2022, 4, 25))
+        self.assertEqual(ages[0].counter.payments[-1].date, datetime(2022, 4, 25))
 
         event = LendEvent('5', 5000, '2022-6-21', datetime(2022, 4, 26), datetime(2022, 4, 26), risky=True)
         apply(event, accountant)
