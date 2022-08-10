@@ -30,10 +30,34 @@ personal_fin_config = {
         'FREELANCING_INCOME': {'type': 'INCOME'},
         'LOANS_PAYBACK': {'type': 'ASSET'},
         'RISKY_LOANS': {'type': 'ASSET'},
-        'MUTUAL_FUNDS_PNL': {'type': 'INCOME'}
+        'MUTUAL_FUNDS_PNL': {'type': 'INCOME'},
+        'CHARITY': {'type': 'EXPENSE'},
+        'FIXED_DEPOSIT': {'type': 'ASSET'}
     },
     'rules': {},
     'actions_config': {
+        'common_actions': {
+            'charity': {
+                'actions': [
+                    {
+                        'dr_account': 'CHARITY',
+                        'cr_account': 'SAVINGS_BANK',
+                        'amount': {'type': '*', 'a': 'amount', 'b': 0.01},
+                        'narration': 'Give charity to {context.to} on {context.date}'
+                    }
+                ]
+            },
+            'fd': {
+                'actions': [
+                    {
+                        'dr_account': 'FIXED_DEPOSIT',
+                        'cr_account': 'SAVINGS_BANK',
+                        'amount': 'context.another_amount',
+                        'narration': 'Put in fixed deposit for {context.sub_narration}'
+                    }
+                ]
+            }
+        },
         'on_event': {
             'SalaryEvent': {
                 'actions': [
@@ -112,6 +136,30 @@ personal_fin_config = {
                         'narration': 'Mutual fund P&L'
                     }
                 ]
+            },
+            'FreelancingSalaryEvent': {
+                'actions': [
+                    {
+                        'dr_account': 'SAVINGS_BANK',
+                        'cr_account': 'SALARY',
+                        'amount': 'amount',
+                        'narration': 'Salary'
+                    },
+                    {
+                        'type': 'action.charity',
+                        'context': {
+                            'to': 'str.TATA Trusts',
+                            'date': 'str.10/05/2022'
+                        }
+                    },
+                    {
+                        'type': 'action.fd',
+                        'context': {
+                            'another_amount': {'type': '*', 'a': 'amount', 'b': 0.09},
+                            'sub_narration': 'str.Freelancing salary'
+                        }
+                    }
+                ]
             }
         }
     }
@@ -164,6 +212,10 @@ class LiquidLoanRepaymentsEvent(Event):
 
 
 class MFProfitEvent(Event):
+    pass
+
+
+class FreelancingSalaryEvent(AmountEvent):
     pass
 
 
@@ -250,3 +302,28 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS'), 20000 * 1.18)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS_PNL'), 20000 * .18)
+
+    def test_common_action(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            FreelancingSalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('CHARITY'), 200)
+        self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 1800)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000 - 200 - 1800)
+
+    def test_sub_narration(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            FreelancingSalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
+        ]
+        for e in events:
+            apply(e, accountant)
+        for je in Ledger(accountant.journal, accountant.config).journal.entries:
+            if je.account == 'CHARITY':
+                self.assertEqual(je.narration, 'Give charity to TATA Trusts on 10/05/2022')
+            if je.account == 'FIXED_DEPOSIT':
+                self.assertEqual(je.narration, 'Put in fixed deposit for Freelancing salary')

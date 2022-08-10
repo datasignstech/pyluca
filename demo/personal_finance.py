@@ -185,6 +185,7 @@ for event in events:
     apply(event, accountant)
 
 ledger = Ledger(accountant.journal, accountant.config)
+
 assert ledger.get_account_balance('SALARY') == 20000
 assert ledger.get_account_balance('MUTUAL_FUNDS') == 10000
 assert ledger.get_account_balance('LOANS') == 5000
