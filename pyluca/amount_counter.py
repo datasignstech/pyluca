@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import List, Optional, Tuple
 
 
-TOLERANCE_FLOATING = 1e-5
+FLOATING_PRECESSION = 1e-6
 
 
 class AccountPayment:
@@ -26,7 +26,7 @@ class AmountCounterInterface:
 
 class AmountCounter(AmountCounterInterface):
     def __init__(self, total_amount: float):
-        assert total_amount > 0, 'Cannot initiate AmountCounter with <= 0 amount'
+        assert total_amount > FLOATING_PRECESSION, f'Cannot initiate AmountCounter with <= {FLOATING_PRECESSION} amount'
         self.total_amount = total_amount
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
@@ -37,7 +37,7 @@ class AmountCounter(AmountCounterInterface):
     def pay(self, amount: float, date: datetime):
         if amount < 0:
             raise ValueError('Pay amount should not be less than 0')
-        possible_pay_amount = min(self.total_amount - self.paid_amount, amount)
+        possible_pay_amount = min(self.get_balance(), amount)
         if possible_pay_amount > 0:
             payment = AccountPayment(possible_pay_amount, date)
             self.payments.append(payment)
@@ -46,10 +46,11 @@ class AmountCounter(AmountCounterInterface):
         return None, amount
 
     def get_balance(self):
-        return self.total_amount - self.paid_amount
+        diff = self.total_amount - self.paid_amount
+        return diff if diff > FLOATING_PRECESSION else 0
 
     def is_paid(self):
-        return abs(self.get_balance()) < TOLERANCE_FLOATING
+        return abs(self.get_balance()) == 0
 
     def get_paid_date(self) -> Optional[datetime]:
         if self.is_paid():
