@@ -26,8 +26,7 @@ def _pay_counters(positive_entries: List[PositiveEntry], amount: float, date: da
         return 0
     rem_amount, cur_idx = amount, 0
     while rem_amount > 0 and cur_idx < len(positive_entries):
-        if not positive_entries[cur_idx].counter.is_paid():
-            _, rem_amount = positive_entries[cur_idx].counter.pay(rem_amount, date)
+        _, rem_amount = positive_entries[cur_idx].counter.pay(rem_amount, date)
         if positive_entries[cur_idx].counter.is_paid():
             cur_idx += 1
         else:
