@@ -36,3 +36,14 @@ class Ledger:
         for acct_name in self.config['accounts'].keys():
             df = self.add_account_balance(acct_name, df)
         return df
+
+    def get_account_type_balance(self, account_type: str):
+        balance = 0
+        accounts = set([j.account for j in self.journal.entries])
+        for account in accounts:
+            if self.config['accounts'][account]['type'] == account_type:
+                balance += self.get_account_balance(account)
+        return balance
+
+
+

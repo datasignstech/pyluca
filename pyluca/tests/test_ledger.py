@@ -32,3 +32,15 @@ class TestLedger(TestCase):
         self.assertEqual(last_row['MUTUAL_FUNDS'], 10000)
         self.assertEqual(last_row['LOANS'], 5000)
         self.assertEqual(last_row['CAR_EMI'], 3000)
+
+    def test_get_account_type_balance(self):
+        accountant = Accountant(Journal(), account_config, '2')
+        accountant.enter_journal('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30), 'April salary')
+        accountant.enter_journal('MUTUAL_FUNDS', 'SAVINGS_BANK', 10000, datetime(2022, 5, 1), 'ELSS')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2022, 5, 2), 'Lend to Pramod')
+        accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2), 'EMI 3/48')
+        ledger = Ledger(accountant.journal, account_config)
+        self.assertEqual(17000, ledger.get_account_type_balance('ASSET'))
+        self.assertEqual(20000, ledger.get_account_type_balance('INCOME'))
+        self.assertEqual(3000, ledger.get_account_type_balance('EXPENSE'))
+
