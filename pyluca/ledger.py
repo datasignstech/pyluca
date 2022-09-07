@@ -41,10 +41,10 @@ class Ledger:
 
     def get_account_type_balance(self, account_type: str, exclude_accounts: List[str] = None):
         balance = 0
-        accounts = [ac for ac in self.config['accounts'].keys() if ac not in exclude_accounts] if exclude_accounts else self.config['accounts'].keys()
-        for account in accounts:
-            if self.config['accounts'][account]['type'] == account_type:
-                balance += self.get_account_balance(account)
+        exclude_accounts = [] if exclude_accounts is None else exclude_accounts
+        for account_name, account in self.config['accounts'].items():
+            if account['type'] == account_type and account_name not in exclude_accounts:
+                balance += self.get_account_balance(account_name)
         return balance
 
 
