@@ -44,3 +44,5 @@ class TestLedger(TestCase):
         self.assertEqual(20000, ledger.get_account_type_balance('INCOME'))
         self.assertEqual(3000, ledger.get_account_type_balance('EXPENSE'))
 
+        self.assertEqual(15000, ledger.get_account_type_balance('ASSET', ['SAVINGS_BANK']))
+        self.assertEqual(10000, ledger.get_account_type_balance('ASSET', ['SAVINGS_BANK', 'LOANS']))

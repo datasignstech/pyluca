@@ -1,3 +1,5 @@
+from typing import List
+
 import pandas as pd
 from pyluca.account_config import BalanceType
 from pyluca.aging import get_account_aging
@@ -37,9 +39,9 @@ class Ledger:
             df = self.add_account_balance(acct_name, df)
         return df
 
-    def get_account_type_balance(self, account_type: str):
+    def get_account_type_balance(self, account_type: str, exclude_accounts: List[str] = None):
         balance = 0
-        accounts = list(self.config['accounts'].keys())
+        accounts = [ac for ac in self.config['accounts'].keys() if ac not in exclude_accounts] if exclude_accounts else self.config['accounts'].keys()
         for account in accounts:
             if self.config['accounts'][account]['type'] == account_type:
                 balance += self.get_account_balance(account)
