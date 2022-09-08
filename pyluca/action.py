@@ -52,7 +52,10 @@ def _parse_narration(narration: str, event: Event, accountant: Accountant, conte
     if matches:
         for match in matches:
             narration = re.sub(match, _get_param(match, event, accountant, context), narration)
-        narration = re.sub(r'[{}]', '', narration)
+        if '}}' in narration and '{{' in narration:
+            narration = narration.replace('{{', '{').replace('}}', '}')
+        else:
+            narration = re.sub(r'[{}]', '', narration)
     return narration
 
 

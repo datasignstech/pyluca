@@ -65,7 +65,7 @@ personal_fin_config = {
                         'dr_account': 'SAVINGS_BANK',
                         'cr_account': 'SALARY',
                         'amount': 'amount',
-                        'narration': 'Salary'
+                        'narration': 'Salary ##{context.meta}##'
                     }
                 ]
             },
@@ -250,7 +250,7 @@ class TestAction(TestCase):
     def test_base(self):
         accountant = Accountant(Journal(), personal_fin_config, '1')
         event = SalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
-        apply(event, accountant)
+        apply(event, accountant, {'meta': f"str.{{'date': {datetime(2022, 4, 21).strftime('%d/%m/%Y')}}}"})
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('SALARY'), 20000)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000)
@@ -298,7 +298,7 @@ class TestAction(TestCase):
             MFProfitEvent('3', datetime(2022, 4, 30), datetime(2022, 4, 30))
         ]
         for e in events:
-            apply(e, accountant, {'multiplier': .18})
+            apply(e, accountant, {'multiplier': .18, 'meta': f"str.{{'date': {datetime(2022, 4, 21).strftime('%d/%m/%Y')}}}"})
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS'), 20000 * 1.18)
         self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS_PNL'), 20000 * .18)
@@ -327,3 +327,13 @@ class TestAction(TestCase):
                 self.assertEqual(je.narration, 'Give charity to TATA Trusts on 10/05/2022')
             if je.account == 'FIXED_DEPOSIT':
                 self.assertEqual(je.narration, 'Put in fixed deposit for Freelancing salary')
+
+        accountant = Accountant(Journal(), personal_fin_config, '2')
+        events = [
+            SalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21)),
+        ]
+        for e in events:
+            apply(e, accountant, {'meta': f"str.{{'date': {datetime(2022, 4, 21).strftime('%d/%m/%Y')}}}"})
+        for je in Ledger(accountant.journal, accountant.config).journal.entries:
+            if je.account == 'SAVINGS_BANK':
+                self.assertEqual(je.narration, "Salary ##{'date': 21/04/2022}##")
