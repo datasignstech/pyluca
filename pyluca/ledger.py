@@ -25,7 +25,9 @@ class Ledger:
         return self.get_account_cr(account) - self.get_account_dr(account)
 
     def get_df(self) -> pd.DataFrame:
-        return pd.DataFrame([j.__dict__ for j in self.journal.entries])
+        ledger_df = pd.DataFrame([j.__dict__ for j in self.journal.entries])
+        ledger_df['account'] = ledger_df['account'].apply(lambda x: self.config['accounts'][x].get('name', x))
+        return ledger_df
 
     def get_aging(self, account: str):
         return get_account_aging(self.config, self.journal.entries, account, self.journal.entries[-1].date)
