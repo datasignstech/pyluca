@@ -26,7 +26,8 @@ class Ledger:
 
     def get_df(self) -> pd.DataFrame:
         ledger_df = pd.DataFrame([j.__dict__ for j in self.journal.entries])
-        ledger_df['account'] = ledger_df['account'].apply(lambda x: self.config['accounts'][x].get('name', x))
+        if not ledger_df.empty:
+            ledger_df['account'] = ledger_df['account'].apply(lambda x: self.config['accounts'][x].get('name', x))
         return ledger_df
 
     def get_aging(self, account: str):
