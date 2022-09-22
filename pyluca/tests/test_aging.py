@@ -22,8 +22,8 @@ account_config = {
         }
     },
     'accounts': {
-        'SALARY': {'type': 'INCOME'},
-        'SAVINGS_BANK': {'type': 'ASSET'},
+        'SALARY': {'type': 'INCOME', 'name': 'SALARY_AMOUNT'},
+        'SAVINGS_BANK': {'type': 'ASSET', 'name': 'SAVINGS_ACCOUNT'},
         'MUTUAL_FUNDS': {'type': 'ASSET'},
         'LOANS': {'type': 'ASSET'},
         'CAR_EMI': {'type': 'EXPENSE'},
