@@ -64,3 +64,16 @@ class TestLedger(TestCase):
             ledger_df[ledger_df['account'] == 'SALARY'].reset_index()._get_value(0, 'account_name')
         )
 
+    def test_get_accounts_balance(self):
+        accountant = Accountant(Journal(), account_config, '3')
+        accountant.enter_journal('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30), 'April salary')
+        accountant.enter_journal('MUTUAL_FUNDS', 'SAVINGS_BANK', 10000, datetime(2022, 5, 1), 'ELSS')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2022, 5, 2), 'Lend to Pramod')
+        accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2), 'EMI 3/48')
+        ledger = Ledger(accountant.journal, account_config)
+        accounts_balance = ledger.get_balances()
+        self.assertEqual(accounts_balance['SAVINGS_BANK'], 2000)
+        self.assertEqual(accounts_balance['SALARY'], 20000)
+        self.assertEqual(accounts_balance['MUTUAL_FUNDS'], 10000)
+        self.assertEqual(accounts_balance['LOANS'], 5000)
+        self.assertEqual(accounts_balance['CAR_EMI'], 3000)
