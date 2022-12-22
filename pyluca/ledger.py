@@ -24,6 +24,15 @@ class Ledger:
             return self.get_account_dr(account) - self.get_account_cr(account)
         return self.get_account_cr(account) - self.get_account_dr(account)
 
+    def get_accounts_balance(self) -> dict:
+        accounts_balance = {}
+        for je in self.journal.entries:
+            if self.config['account_types'][self.config['accounts'][je.account]['type']]['balance_type'] == BalanceType.DEBIT.value:
+                accounts_balance[je.account] = accounts_balance.get(je.account, 0) + (je.dr_amount - je.cr_amount)
+            else:
+                accounts_balance[je.account] = accounts_balance.get(je.account, 0) + (je.cr_amount - je.dr_amount)
+        return accounts_balance
+
     def get_df(self) -> pd.DataFrame:
         ledger_df = pd.DataFrame([j.__dict__ for j in self.journal.entries])
         if not ledger_df.empty:
