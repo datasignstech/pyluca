@@ -71,7 +71,7 @@ class TestLedger(TestCase):
         accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2022, 5, 2), 'Lend to Pramod')
         accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2), 'EMI 3/48')
         ledger = Ledger(accountant.journal, account_config)
-        accounts_balance = ledger.get_accounts_balance()
+        accounts_balance = ledger.get_balances()
         self.assertEqual(accounts_balance['SAVINGS_BANK'], 2000)
         self.assertEqual(accounts_balance['SALARY'], 20000)
         self.assertEqual(accounts_balance['MUTUAL_FUNDS'], 10000)
