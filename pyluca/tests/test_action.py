@@ -336,16 +336,18 @@ class TestAction(TestCase):
                 'type': 'external_action.check_balance',
                 'context': {
                     'acct_name': 'str.SALARY',
-                    'balance': 'balance.SALARY'
+                    'balance': 'balance.SALARY',
+                    'date': 'date'
                 }
             }
         ]
 
         local_state = {'checked': False}
 
-        def __check_balance(acct_name: str, balance: str):
+        def __check_balance(acct_name: str, balance: str, date: datetime):
             assert acct_name == 'SALARY'
             assert balance == 20000
+            assert date == datetime(2023, 1, 22)
             local_state['checked'] = True
 
         accountant = Accountant(Journal(), config, '1')
