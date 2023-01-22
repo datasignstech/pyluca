@@ -69,7 +69,8 @@ def _apply_action(
         event: Event,
         accountant: Accountant,
         context: dict,
-        common_actions: dict
+        common_actions: dict,
+        externals: dict
 ):
     if action.get('iff') and not _get_param(action['iff'], event, accountant, context):
         return
@@ -84,12 +85,24 @@ def _apply_action(
         )
     elif action_type.startswith('action.'):
         for sub_action in common_actions[action_type.replace('action.', '')]['actions']:
-            _apply_action(sub_action, event, accountant, {**context, **action.get('context', {})}, common_actions)
+            _apply_action(
+                sub_action, event, accountant,
+                {**context, **action.get('context', {})},
+                common_actions,
+                externals
+            )
+    elif action_type.startswith('external.'):
+        name = action_type.replace('external.', '')
+        args = {k: _get_param(v, event, accountant, context) for k, v in action.get('context', {}).items()}
+        externals[name](**args)
+    else:
+        raise NotImplementedError(f'"{action_type}" is not a valid action type!')
 
 
-def apply(event: Event, accountant: Accountant, context: dict = None):
+def apply(event: Event, accountant: Accountant, context: dict = None, externals: dict = None):
     context = context if context else {}
     event_config = accountant.config['actions_config']['on_event'][event.__class__.__name__]
     common_actions = accountant.config['actions_config'].get('common_actions', {})
+    externals = externals if externals else {}
     for action in event_config['actions']:
-        _apply_action(action, event, accountant, context, common_actions)
+        _apply_action(action, event, accountant, context, common_actions, externals)

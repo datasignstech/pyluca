@@ -327,3 +327,32 @@ class TestAction(TestCase):
                 self.assertEqual(je.narration, 'Give charity to TATA Trusts on 10/05/2022')
             if je.account == 'FIXED_DEPOSIT':
                 self.assertEqual(je.narration, 'Put in fixed deposit for Freelancing salary')
+
+    def test_externals(self):
+        config = {**personal_fin_config}
+        config['actions_config']['on_event']['SalaryEvent']['actions'] = [
+            *config['actions_config']['on_event']['SalaryEvent']['actions'],
+            {
+                'type': 'external.check_balance',
+                'context': {
+                    'acct_name': 'str.SALARY',
+                    'balance': 'balance.SALARY'
+                }
+            }
+        ]
+
+        local_state = {'checked': False}
+
+        def __check_balance(acct_name: str, balance: str):
+            assert acct_name == 'SALARY'
+            assert balance == 20000
+            local_state['checked'] = True
+
+        accountant = Accountant(Journal(), config, '1')
+        events = [
+            SalaryEvent('1', 20000, datetime(2023, 1, 22), datetime(2023, 1, 22))
+        ]
+        for e in events:
+            apply(e, accountant, externals={'check_balance': __check_balance})
+
+        self.assertTrue(local_state['checked'])
