@@ -92,9 +92,8 @@ def _apply_action(
                 external_actions
             )
     elif action_type.startswith('external_action.'):
-        name = action_type.replace('external_action.', '')
-        args = {k: _get_param(v, event, accountant, context) for k, v in action.get('context', {}).items()}
-        external_actions[name](**args)
+        kwargs = {k: _get_param(v, event, accountant, context) for k, v in action.get('context', {}).items()}
+        external_actions[action_type.replace('external_action.', '')](**kwargs)
     else:
         raise NotImplementedError(f'"{action_type}" is not a valid action type!')
 
