@@ -333,7 +333,7 @@ class TestAction(TestCase):
         config['actions_config']['on_event']['SalaryEvent']['actions'] = [
             *config['actions_config']['on_event']['SalaryEvent']['actions'],
             {
-                'type': 'external.check_balance',
+                'type': 'external_action.check_balance',
                 'context': {
                     'acct_name': 'str.SALARY',
                     'balance': 'balance.SALARY'
@@ -353,6 +353,6 @@ class TestAction(TestCase):
             SalaryEvent('1', 20000, datetime(2023, 1, 22), datetime(2023, 1, 22))
         ]
         for e in events:
-            apply(e, accountant, externals={'check_balance': __check_balance})
+            apply(e, accountant, external_actions={'check_balance': __check_balance})
 
         self.assertTrue(local_state['checked'])
