@@ -31,7 +31,7 @@ def _get_param(
         key: Union[str, list, dict],
         event: Event,
         accountant: Accountant,
-        context: dict,
+        context: dict
 ):
     if key is None:
         return None
