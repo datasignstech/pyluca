@@ -20,10 +20,10 @@ _OPERATOR_CONFIG = {
 }
 
 
-def _apply_operator(operator: dict, event: Event, accountant: Accountant, context: dict, opening_balances: dict):
+def _apply_operator(operator: dict, event: Event, accountant: Accountant, context: dict):
     return _OPERATOR_CONFIG[operator['type']](
-        _get_param(operator['a'], event, accountant, context, opening_balances),
-        _get_param(operator.get('b'), event, accountant, context, opening_balances)
+        _get_param(operator['a'], event, accountant, context),
+        _get_param(operator.get('b'), event, accountant, context)
     )
 
 
@@ -32,41 +32,40 @@ def _get_param(
         event: Event,
         accountant: Accountant,
         context: dict,
-        opening_balances: dict
 ):
     if key is None:
         return None
     if type(key) in [int, float]:
         return key
     if isinstance(key, dict) and key.get('type'):
-        return _apply_operator(key, event, accountant, context, opening_balances)
+        return _apply_operator(key, event, accountant, context)
     if key.startswith('str.'):
         return key.replace('str.', '')
     if key.startswith('context.'):
         next_key = key.replace('context.', '')
-        return _get_param(context[next_key], event, accountant, context, opening_balances)
+        return _get_param(context[next_key], event, accountant, context)
     if key.startswith('balance.'):
         return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
     if key.startswith('opening.'):
-        return opening_balances.get(key.replace('opening.', ''), 0)
+        return context['opening_balances'][key.replace('opening.', '')]
     if hasattr(event, key):
         return event.__getattribute__(key)
     raise NotImplementedError(f'param {key} not implemented')
 
 
-def _parse_narration(narration: str, event: Event, accountant: Accountant, context: dict, opening_balances: dict):
+def _parse_narration(narration: str, event: Event, accountant: Accountant, context: dict):
     matches = re.findall("\{([^}]+)\}", narration)
     if matches:
         for match in matches:
-            narration = re.sub(match, _get_param(match, event, accountant, context, opening_balances), narration)
+            narration = re.sub(match, _get_param(match, event, accountant, context), narration)
         narration = re.sub(r'[{}]', '', narration)
     return narration
 
 
-def _get_narration(action: dict, event: Event, accountant: Accountant, context: dict, opening_balances: dict):
-    narration = _parse_narration(action['narration'], event, accountant, context, opening_balances)
+def _get_narration(action: dict, event: Event, accountant: Accountant, context: dict):
+    narration = _parse_narration(action['narration'], event, accountant, context)
     if action.get('meta'):
-        meta = {k: _get_param(v, event, accountant, context, opening_balances) for k, v in action['meta'].items()}
+        meta = {k: _get_param(v, event, accountant, context) for k, v in action['meta'].items()}
         narration = f'{narration} ##{json.dumps(meta)}##'
     return narration
 
@@ -77,19 +76,18 @@ def _apply_action(
         accountant: Accountant,
         context: dict,
         common_actions: dict,
-        external_actions: dict,
-        opening_balances: dict
+        external_actions: dict
 ):
-    if action.get('iff') and not _get_param(action['iff'], event, accountant, context, opening_balances):
+    if action.get('iff') and not _get_param(action['iff'], event, accountant, context):
         return
     action_type = action.get('type', 'je')
     if action_type == 'je':
         accountant.enter_journal(
             action['dr_account'],
             action['cr_account'],
-            _get_param(action['amount'], event, accountant, context, opening_balances),
+            _get_param(action['amount'], event, accountant, context),
             event.date,
-            _get_narration(action, event, accountant, context, opening_balances)
+            _get_narration(action, event, accountant, context)
         )
     elif action_type.startswith('action.'):
         for sub_action in common_actions[action_type.replace('action.', '')]['actions']:
@@ -97,23 +95,20 @@ def _apply_action(
                 sub_action, event, accountant,
                 {**context, **action.get('context', {})},
                 common_actions,
-                external_actions,
-                opening_balances
+                external_actions
             )
     elif action_type.startswith('external_action.'):
-        kwargs = {
-            k: _get_param(v, event, accountant, context, opening_balances) for k, v in action.get('context', {}).items()
-        }
+        kwargs = {k: _get_param(v, event, accountant, context) for k, v in action.get('context', {}).items()}
         external_actions[action_type.replace('external_action.', '')](**kwargs)
     else:
         raise NotImplementedError(f'"{action_type}" is not a valid action type!')
 
 
 def apply(event: Event, accountant: Accountant, context: dict = None, external_actions: dict = None):
-    opening_balances = Ledger(accountant.journal, accountant.config).get_balances()
     context = context if context else {}
+    context['opening_balances'] = Ledger(accountant.journal, accountant.config).get_balances()
     event_config = accountant.config['actions_config']['on_event'][event.__class__.__name__]
     common_actions = accountant.config['actions_config'].get('common_actions', {})
     external_actions = external_actions if external_actions else {}
     for action in event_config['actions']:
-        _apply_action(action, event, accountant, context, common_actions, external_actions, opening_balances)
+        _apply_action(action, event, accountant, context, common_actions, external_actions)
