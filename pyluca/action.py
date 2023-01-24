@@ -46,8 +46,8 @@ def _get_param(
         return _get_param(context[next_key], event, accountant, context)
     if key.startswith('balance.'):
         return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
-    if key.startswith('opening.'):
-        return context['opening_balances'][key.replace('opening.', '')]
+    if key.startswith('opening_balance.'):
+        return context['opening_balances'][key.replace('opening_balance.', '')]
     if hasattr(event, key):
         return event.__getattribute__(key)
     raise NotImplementedError(f'param {key} not implemented')

@@ -181,10 +181,10 @@ personal_fin_config = {
                             'type': 'min',
                             'a': {
                                 "type": "min",
-                                "a": "opening.CAR_EMI",
+                                "a": "opening_balance.CAR_EMI",
                                 "b": "amount"
                             },
-                            'b': 'opening.SALARY'
+                            'b': 'opening_balance.SALARY'
                         },
                         'narration': 'Paying Car EMI'
                     },
@@ -195,17 +195,17 @@ personal_fin_config = {
                             "type": "-",
                             "a": {
                                 "type": "min",
-                                "a": "opening.CAR_EMI",
+                                "a": "opening_balance.CAR_EMI",
                                 "b": "amount"
                             },
                             "b": {
                                 "type": "min",
                                 "a": {
                                     "type": "min",
-                                    "a": "opening.CAR_EMI",
+                                    "a": "opening_balance.CAR_EMI",
                                     "b": "amount"
                                 },
-                                "b": "opening.SALARY"
+                                "b": "opening_balance.SALARY"
                             }
                         },
                         'narration': 'Paying Car EMI'
