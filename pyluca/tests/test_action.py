@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime
 from unittest import TestCase
 from pyluca.accountant import Accountant
@@ -26,13 +27,15 @@ personal_fin_config = {
         'SAVINGS_BANK': {'type': 'ASSET'},
         'MUTUAL_FUNDS': {'type': 'ASSET'},
         'LOANS': {'type': 'ASSET'},
-        'CAR_EMI': {'type': 'EXPENSE'},
+        'CAR_EMI': {'type': 'LIABILITY'},
+        'CAR_LOAN': {'type': 'LIABILITY'},
         'FREELANCING_INCOME': {'type': 'INCOME'},
         'LOANS_PAYBACK': {'type': 'ASSET'},
         'RISKY_LOANS': {'type': 'ASSET'},
         'MUTUAL_FUNDS_PNL': {'type': 'INCOME'},
         'CHARITY': {'type': 'EXPENSE'},
-        'FIXED_DEPOSIT': {'type': 'ASSET'}
+        'FIXED_DEPOSIT': {'type': 'ASSET'},
+        'BORROW': {'type': 'LIABILITY'}
     },
     'rules': {},
     'actions_config': {
@@ -160,6 +163,48 @@ personal_fin_config = {
                         }
                     }
                 ]
+            },
+            'CarEMIBillEvent': {
+                'actions': [
+                    {
+                        'dr_account': 'CAR_LOAN',
+                        'cr_account': 'CAR_EMI',
+                        'amount': 'amount',
+                        'narration': 'Car EMI Bill'
+                    }
+                ]
+            },
+            'PayCarEMIEvent': {
+                'actions': [
+                    {
+                        'dr_account': 'CAR_EMI',
+                        'cr_account': 'SAVINGS_BANK',
+                        'amount': {
+                            'type': 'min',
+                            'a': 'amount',
+                            'b': 'opening_balance.SAVINGS_BANK'
+                        },
+                        'narration': 'Paying Car EMI'
+                    },
+                    {
+                        'dr_account': 'CAR_EMI',
+                        'cr_account': 'BORROW',
+                        'amount': {
+                            "type": "-",
+                            "a": {
+                                "type": "min",
+                                "a": "opening_balance.CAR_EMI",
+                                "b": "amount"
+                            },
+                            "b": {
+                                "type": "min",
+                                "a": 'amount',
+                                "b": "opening_balance.SAVINGS_BANK"
+                            }
+                        },
+                        'narration': 'Paying Car EMI'
+                    },
+                ]
             }
         }
     }
@@ -216,6 +261,14 @@ class MFProfitEvent(Event):
 
 
 class FreelancingSalaryEvent(AmountEvent):
+    pass
+
+
+class CarEMIBillEvent(AmountEvent):
+    pass
+
+
+class PayCarEMIEvent(AmountEvent):
     pass
 
 
@@ -329,7 +382,7 @@ class TestAction(TestCase):
                 self.assertEqual(je.narration, 'Put in fixed deposit for Freelancing salary')
 
     def test_externals(self):
-        config = {**personal_fin_config}
+        config = deepcopy(personal_fin_config)
         config['actions_config']['on_event']['SalaryEvent']['actions'] = [
             *config['actions_config']['on_event']['SalaryEvent']['actions'],
             {
@@ -358,3 +411,34 @@ class TestAction(TestCase):
             apply(e, accountant, external_actions={'check_balance': __check_balance})
 
         self.assertTrue(local_state['checked'])
+
+    def test_opening_balances(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            SalaryEvent('1', 2000, datetime(2022, 4, 1), datetime(2022, 4, 1)),
+            CarEMIBillEvent('2', 3000, datetime(2022, 4, 2), datetime(2022, 4, 2))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('SALARY'), 2000)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2000)
+        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 3000)
+        events = [
+            PayCarEMIEvent('1', 2700, datetime(2022, 4, 3), datetime(2022, 4, 3))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 0)
+        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 300)
+        self.assertEqual(ledger.get_account_balance('BORROW'), 700)
+        events = [
+            PayCarEMIEvent('1', 300, datetime(2022, 4, 4), datetime(2022, 4, 4))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 0)
+        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 0)
+        self.assertEqual(ledger.get_account_balance('BORROW'), 1000)

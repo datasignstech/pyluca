@@ -46,6 +46,8 @@ def _get_param(
         return _get_param(context[next_key], event, accountant, context)
     if key.startswith('balance.'):
         return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
+    if key.startswith('opening_balance.'):
+        return context['opening_balances'][key.replace('opening_balance.', '')]
     if hasattr(event, key):
         return event.__getattribute__(key)
     raise NotImplementedError(f'param {key} not implemented')
@@ -104,6 +106,7 @@ def _apply_action(
 
 def apply(event: Event, accountant: Accountant, context: dict = None, external_actions: dict = None):
     context = context if context else {}
+    context['opening_balances'] = Ledger(accountant.journal, accountant.config).get_balances()
     event_config = accountant.config['actions_config']['on_event'][event.__class__.__name__]
     common_actions = accountant.config['actions_config'].get('common_actions', {})
     external_actions = external_actions if external_actions else {}
