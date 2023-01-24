@@ -160,6 +160,56 @@ personal_fin_config = {
                         }
                     }
                 ]
+            },
+            'BilledCarEMIEvent': {
+                'actions': [
+                    {
+                        'dr_account': 'CAR_EMI',
+                        'cr_account': 'LOANS',
+                        'amount': 'amount',
+                        'narration': 'Car EMI Bill'
+                    }
+                ]
+            },
+            'PayCarEMIEvent': {
+                'actions': [
+                    {
+                        'dr_account': 'SALARY',
+                        'cr_account': 'CAR_EMI',
+                        'amount': {
+                            'type': 'min',
+                            'a': {
+                                "type": "min",
+                                "a": "opening.CAR_EMI",
+                                "b": "amount"
+                            },
+                            'b': 'opening.SALARY'
+                        },
+                        'narration': 'Paying Car EMI'
+                    },
+                    {
+                        'dr_account': 'SAVINGS_BANK',
+                        'cr_account': 'CAR_EMI',
+                        'amount': {
+                            "type": "-",
+                            "a": {
+                                "type": "min",
+                                "a": "opening.CAR_EMI",
+                                "b": "amount"
+                            },
+                            "b": {
+                                "type": "min",
+                                "a": {
+                                    "type": "min",
+                                    "a": "opening.CAR_EMI",
+                                    "b": "amount"
+                                },
+                                "b": "opening.SALARY"
+                            }
+                        },
+                        'narration': 'Paying Car EMI'
+                    },
+                ]
             }
         }
     }
@@ -216,6 +266,14 @@ class MFProfitEvent(Event):
 
 
 class FreelancingSalaryEvent(AmountEvent):
+    pass
+
+
+class BilledCarEMIEvent(AmountEvent):
+    pass
+
+
+class PayCarEMIEvent(AmountEvent):
     pass
 
 
@@ -358,3 +416,25 @@ class TestAction(TestCase):
             apply(e, accountant, external_actions={'check_balance': __check_balance})
 
         self.assertTrue(local_state['checked'])
+
+    def test_opening_balances(self):
+        accountant = Accountant(Journal(), personal_fin_config, '1')
+        events = [
+            SalaryEvent('1', 2000, datetime(2022, 4, 1), datetime(2022, 4, 1)),
+            BilledCarEMIEvent('2', 3000, datetime(2022, 4, 2), datetime(2022, 4, 2))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('SALARY'), 2000)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2000)
+        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 3000)
+        events = [
+            PayCarEMIEvent('1', 2700, datetime(2022, 4, 3), datetime(2022, 4, 3))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('SALARY'), 0)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2700)
+        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 300)
