@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime
 from unittest import TestCase
 from pyluca.accountant import Accountant
@@ -387,7 +388,7 @@ class TestAction(TestCase):
                 self.assertEqual(je.narration, 'Put in fixed deposit for Freelancing salary')
 
     def test_externals(self):
-        config = {**personal_fin_config}
+        config = deepcopy(personal_fin_config)
         config['actions_config']['on_event']['SalaryEvent']['actions'] = [
             *config['actions_config']['on_event']['SalaryEvent']['actions'],
             {
