@@ -27,13 +27,15 @@ personal_fin_config = {
         'SAVINGS_BANK': {'type': 'ASSET'},
         'MUTUAL_FUNDS': {'type': 'ASSET'},
         'LOANS': {'type': 'ASSET'},
-        'CAR_EMI': {'type': 'EXPENSE'},
+        'CAR_EMI': {'type': 'LIABILITY'},
+        'CAR_LOAN': {'type': 'LIABILITY'},
         'FREELANCING_INCOME': {'type': 'INCOME'},
         'LOANS_PAYBACK': {'type': 'ASSET'},
         'RISKY_LOANS': {'type': 'ASSET'},
         'MUTUAL_FUNDS_PNL': {'type': 'INCOME'},
         'CHARITY': {'type': 'EXPENSE'},
-        'FIXED_DEPOSIT': {'type': 'ASSET'}
+        'FIXED_DEPOSIT': {'type': 'ASSET'},
+        'BORROW': {'type': 'LIABILITY'}
     },
     'rules': {},
     'actions_config': {
@@ -165,8 +167,8 @@ personal_fin_config = {
             'BilledCarEMIEvent': {
                 'actions': [
                     {
-                        'dr_account': 'CAR_EMI',
-                        'cr_account': 'LOANS',
+                        'dr_account': 'CAR_LOAN',
+                        'cr_account': 'CAR_EMI',
                         'amount': 'amount',
                         'narration': 'Car EMI Bill'
                     }
@@ -175,8 +177,8 @@ personal_fin_config = {
             'PayCarEMIEvent': {
                 'actions': [
                     {
-                        'dr_account': 'SALARY',
-                        'cr_account': 'CAR_EMI',
+                        'dr_account': 'CAR_EMI',
+                        'cr_account': 'SAVINGS_BANK',
                         'amount': {
                             'type': 'min',
                             'a': {
@@ -184,13 +186,13 @@ personal_fin_config = {
                                 "a": "opening_balance.CAR_EMI",
                                 "b": "amount"
                             },
-                            'b': 'opening_balance.SALARY'
+                            'b': 'opening_balance.SAVINGS_BANK'
                         },
                         'narration': 'Paying Car EMI'
                     },
                     {
-                        'dr_account': 'SAVINGS_BANK',
-                        'cr_account': 'CAR_EMI',
+                        'dr_account': 'CAR_EMI',
+                        'cr_account': 'BORROW',
                         'amount': {
                             "type": "-",
                             "a": {
@@ -205,7 +207,7 @@ personal_fin_config = {
                                     "a": "opening_balance.CAR_EMI",
                                     "b": "amount"
                                 },
-                                "b": "opening_balance.SALARY"
+                                "b": "opening_balance.SAVINGS_BANK"
                             }
                         },
                         'narration': 'Paying Car EMI'
@@ -436,15 +438,15 @@ class TestAction(TestCase):
         for e in events:
             apply(e, accountant)
         ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('SALARY'), 0)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2700)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 0)
         self.assertEqual(ledger.get_account_balance('CAR_EMI'), 300)
+        self.assertEqual(ledger.get_account_balance('BORROW'), 700)
         events = [
             PayCarEMIEvent('1', 300, datetime(2022, 4, 4), datetime(2022, 4, 4))
         ]
         for e in events:
             apply(e, accountant)
         ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('SALARY'), 0)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 3000)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 0)
         self.assertEqual(ledger.get_account_balance('CAR_EMI'), 0)
+        self.assertEqual(ledger.get_account_balance('BORROW'), 1000)
