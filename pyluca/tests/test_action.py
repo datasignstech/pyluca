@@ -164,7 +164,7 @@ personal_fin_config = {
                     }
                 ]
             },
-            'BilledCarEMIEvent': {
+            'CarEMIBillEvent': {
                 'actions': [
                     {
                         'dr_account': 'CAR_LOAN',
@@ -181,11 +181,7 @@ personal_fin_config = {
                         'cr_account': 'SAVINGS_BANK',
                         'amount': {
                             'type': 'min',
-                            'a': {
-                                "type": "min",
-                                "a": "opening_balance.CAR_EMI",
-                                "b": "amount"
-                            },
+                            'a': 'amount',
                             'b': 'opening_balance.SAVINGS_BANK'
                         },
                         'narration': 'Paying Car EMI'
@@ -202,11 +198,7 @@ personal_fin_config = {
                             },
                             "b": {
                                 "type": "min",
-                                "a": {
-                                    "type": "min",
-                                    "a": "opening_balance.CAR_EMI",
-                                    "b": "amount"
-                                },
+                                "a": 'amount',
                                 "b": "opening_balance.SAVINGS_BANK"
                             }
                         },
@@ -272,7 +264,7 @@ class FreelancingSalaryEvent(AmountEvent):
     pass
 
 
-class BilledCarEMIEvent(AmountEvent):
+class CarEMIBillEvent(AmountEvent):
     pass
 
 
@@ -424,7 +416,7 @@ class TestAction(TestCase):
         accountant = Accountant(Journal(), personal_fin_config, '1')
         events = [
             SalaryEvent('1', 2000, datetime(2022, 4, 1), datetime(2022, 4, 1)),
-            BilledCarEMIEvent('2', 3000, datetime(2022, 4, 2), datetime(2022, 4, 2))
+            CarEMIBillEvent('2', 3000, datetime(2022, 4, 2), datetime(2022, 4, 2))
         ]
         for e in events:
             apply(e, accountant)
