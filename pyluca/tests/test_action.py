@@ -438,3 +438,12 @@ class TestAction(TestCase):
         self.assertEqual(ledger.get_account_balance('SALARY'), 0)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2700)
         self.assertEqual(ledger.get_account_balance('CAR_EMI'), 300)
+        events = [
+            PayCarEMIEvent('1', 300, datetime(2022, 4, 4), datetime(2022, 4, 4))
+        ]
+        for e in events:
+            apply(e, accountant)
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('SALARY'), 0)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 3000)
+        self.assertEqual(ledger.get_account_balance('CAR_EMI'), 0)
