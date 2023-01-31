@@ -50,10 +50,8 @@ def get_account_aging(
         as_of: datetime,
         previous_state: AgingState = None
 ) -> Tuple[List[AccountAge], AgingState]:
-    def should_entry_applied(e: JournalEntry):
+    def should_entry_applied(e: JournalEntry) -> bool:
         return e.date <= as_of and e.account == account and (previous_state is None or e.sl_no > previous_state.sl_no)
-
-    filtered_entries = [e for e in entries if should_entry_applied(e)]
 
     state = deepcopy(previous_state)
     if state is None:
@@ -63,7 +61,9 @@ def get_account_aging(
         raise ValueError('Invalid previous state provided. account should match')
 
     account_type = config['accounts'][account]['type']
-    for entry in filtered_entries:
+    for entry in entries:
+        if not should_entry_applied(entry):
+            continue
         account_balance_type = config['account_types'][account_type]['balance_type']
         positive_amount = entry.cr_amount if account_balance_type == BalanceType.CREDIT.value else entry.dr_amount
         negative_amount = entry.dr_amount if account_balance_type == BalanceType.CREDIT.value else entry.cr_amount
