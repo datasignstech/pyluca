@@ -160,4 +160,4 @@ class TestAging(TestCase):
             )
             raise AssertionError('Should not have passed because wrong previous state provided')
         except ValueError as e:
-            self.assertEqual(str(e), 'Invalid previous state provided. account should match')
+            self.assertEqual(str(e), 'Invalid previous state! account not matching')
