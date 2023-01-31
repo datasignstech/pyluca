@@ -37,7 +37,7 @@ account_config = {
 class TestAging(TestCase):
     def test_aging(self):
         dt = datetime.now()
-        ages = get_account_aging(account_config, [
+        ages, _ = get_account_aging(account_config, [
             JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
             JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
             JournalEntry(3, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
@@ -46,7 +46,7 @@ class TestAging(TestCase):
         for age in ages:
             self.assertEqual(age.counter.is_paid(), True)
 
-        ages = get_account_aging(account_config, [
+        ages, _ = get_account_aging(account_config, [
             JournalEntry(4, 'SAVINGS_BANK', 0, 4000, dt, '', '1'),
             JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
             JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
@@ -55,7 +55,7 @@ class TestAging(TestCase):
         for age in ages:
             self.assertEqual(age.counter.is_paid(), True)
 
-        ages = get_account_aging(account_config, [
+        ages, _ = get_account_aging(account_config, [
             JournalEntry(4, 'SAVINGS_BANK', 0, 3000, dt, '', '1'),
             JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
             JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
@@ -67,7 +67,7 @@ class TestAging(TestCase):
         self.assertEqual(ages[2].counter.is_paid(), False)
         self.assertEqual(ages[2].counter.get_balance(), 1000)
 
-        ages = get_account_aging(account_config, [
+        ages, _ = get_account_aging(account_config, [
             JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
             JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1'),
             JournalEntry(3, 'SAVINGS_BANK', 0, 3000, dt, '', '1'),
@@ -89,7 +89,7 @@ class TestAging(TestCase):
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 300, datetime(2022, 5, 10), 'Payback 1')
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 200, datetime(2022, 5, 15), 'Payback 2')
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 500, datetime(2022, 5, 20), 'Payback 3')
-        ages = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 5, 25))
+        ages, _ = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 5, 25))
         self.assertEqual(len(ages), 1)
         self.assertEqual(ages[0].counter.is_paid(), True)
         self.assertEqual(len(ages[0].counter.payments), 3)
@@ -102,7 +102,7 @@ class TestAging(TestCase):
         accountant.enter_journal('SAVINGS_BANK', 'SALARY', 200, datetime(2022, 8, 9), 'Salary')
         accountant.enter_journal('LOANS', 'SAVINGS_BANK', 100.128839293829282838283823, datetime(2022, 8, 10), 'XYZ client')
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 100.12883, datetime(2022, 8, 10), 'XYZ client')
-        ages = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 11))
+        ages, _ = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 11))
         age = ages[0]
         self.assertTrue(age.counter.is_paid())
         self.assertAlmostEqual(age.counter.get_balance(), 0, 4)
@@ -112,7 +112,7 @@ class TestAging(TestCase):
         accountant.enter_journal('LOANS', 'SAVINGS_BANK', 100.128839293829282838283823, datetime(2022, 8, 10),
                                  'XYZ client')
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 100.1288, datetime(2022, 8, 10), 'XYZ client')
-        ages = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 11))
+        ages, _ = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 11))
         age = ages[0]
         self.assertFalse(age.counter.is_paid())
 
@@ -124,7 +124,7 @@ class TestAging(TestCase):
                                  'To b')
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 100, datetime(2022, 8, 10), 'From a')
         accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 199.999994222222222, datetime(2022, 8, 10), 'From b')
-        ages = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 11))
+        ages, _ = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 11))
         age1, age2 = ages[0], ages[1]
         self.assertTrue(age1.counter.is_paid())
         self.assertTrue(age2.counter.is_paid())
@@ -132,3 +132,32 @@ class TestAging(TestCase):
         self.assertNotEqual(age2.counter.get_balance(), 0)
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertAlmostEqual(ledger.get_account_balance('LOANS'), 0, 4)
+
+    def test_aging_state(self):
+        accountant = Accountant(Journal(), account_config, 'person1')
+        accountant.enter_journal('SAVINGS_BANK', 'SALARY', 200, datetime(2022, 8, 9), 'Salary')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 100, datetime(2022, 8, 10),
+                                 'To a')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 200, datetime(2022, 8, 10),
+                                 'To b')
+        ages, state = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 10))
+        self.assertEqual(state.sl_no, 4)
+        self.assertEqual(len(state.positive_entries), 2)
+        accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 100, datetime(2022, 8, 10), 'From a')
+        accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 199, datetime(2022, 8, 10), 'From b')
+        ages, state = get_account_aging(
+            account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 10), previous_state=state
+        )
+        self.assertEqual(Ledger(accountant.journal, accountant.config).get_account_balance('LOANS'), 1)
+        self.assertEqual(ages[0].counter.get_balance(), 0)
+        self.assertEqual(ages[1].counter.get_balance(), 1)
+        self.assertEqual(state.sl_no, 9)
+        self.assertEqual(len(state.positive_entries), 2)
+
+        try:
+            get_account_aging(
+                account_config, accountant.journal.entries, 'SAVINGS_BANK', datetime(2022, 8, 10), previous_state=state
+            )
+            raise AssertionError('Should not have passed because wrong previous state provided')
+        except ValueError as e:
+            self.assertEqual(str(e), 'Invalid previous state! account not matching')

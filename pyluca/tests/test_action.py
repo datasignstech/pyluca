@@ -267,14 +267,14 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 5000)
         self.assertEqual(ledger.get_account_balance('LOANS'), 5000)
-        ages = ledger.get_aging('LOANS')
+        ages, _ = ledger.get_aging('LOANS')
         self.assertEqual(ages[0].meta, {'due_date': '2022-6-21'})
 
         event = ClearLoansEvent('4', datetime(2022, 4, 25), datetime(2022, 4, 25))
         apply(event, accountant)
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('LOANS'), 0)
-        ages = ledger.get_aging('LOANS')
+        ages, _ = ledger.get_aging('LOANS')
         self.assertEqual(ages[0].counter.payments[-1].date, datetime(2022, 4, 25))
 
         event = LendEvent('5', 5000, '2022-6-21', datetime(2022, 4, 26), datetime(2022, 4, 26), risky=True)

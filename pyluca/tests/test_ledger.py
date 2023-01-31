@@ -16,7 +16,7 @@ class TestLedger(TestCase):
             JournalEntry(3, 'SAVINGS_BANK', 0, 3000, dt, '', '1'),
             JournalEntry(4, 'SAVINGS_BANK', 2000, 0, dt, '', '1'),
         ])
-        ages = Ledger(journal, account_config).get_aging('SAVINGS_BANK')
+        ages, _ = Ledger(journal, account_config).get_aging('SAVINGS_BANK')
         self.assertEqual(len(ages), 3)
 
     def test_ledger_balance_sheet(self):
