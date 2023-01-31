@@ -1,7 +1,8 @@
 import json
 import re
+from copy import deepcopy
 from datetime import datetime
-from typing import NamedTuple, List, Optional
+from typing import NamedTuple, List, Optional, Tuple
 from pyluca.account_config import BalanceType
 from pyluca.journal import JournalEntry
 from pyluca.amount_counter import AmountCounter
@@ -19,7 +20,15 @@ class PositiveEntry(NamedTuple):
     meta: Optional[dict]
 
 
-def _pay_counters(positive_entries: List[PositiveEntry], amount: float, date: datetime) -> float:
+class AgingState:
+    def __init__(self, account: str, positive_entries: List[PositiveEntry], excess_amount: float, sl_no: int):
+        self.account = account
+        self.positive_entries = positive_entries
+        self.excess_amount = excess_amount
+        self.sl_no = sl_no
+
+
+def __pay_counters(positive_entries: List[PositiveEntry], amount: float, date: datetime) -> float:
     if len(positive_entries) == 0:
         return amount
     if amount == 0:
@@ -38,11 +47,21 @@ def get_account_aging(
         config: dict,
         entries: List[JournalEntry],
         account: str,
-        as_of: datetime
-) -> List[AccountAge]:
-    filtered_entries = [e for e in entries if e.date <= as_of and e.account == account]
-    positive_entries: List[PositiveEntry] = []
-    active_counter_idx, excess_amount = 0, 0
+        as_of: datetime,
+        previous_state: AgingState = None
+) -> Tuple[List[AccountAge], AgingState]:
+    def should_entry_applied(e: JournalEntry):
+        return e.date <= as_of and e.account == account and (previous_state is None or e.sl_no > previous_state.sl_no)
+
+    filtered_entries = [e for e in entries if should_entry_applied(e)]
+
+    state = deepcopy(previous_state)
+    if state is None:
+        state = AgingState(account, [], 0, -1)
+
+    if state.account != account:
+        raise ValueError('Invalid previous state provided. account should match')
+
     account_type = config['accounts'][account]['type']
     for entry in filtered_entries:
         account_balance_type = config['account_types'][account_type]['balance_type']
@@ -50,12 +69,13 @@ def get_account_aging(
         negative_amount = entry.dr_amount if account_balance_type == BalanceType.CREDIT.value else entry.cr_amount
         if positive_amount > 0:
             meta = re.match('.*##(.*)##.*', entry.narration)
-            positive_entries.append(
+            state.positive_entries.append(
                 PositiveEntry(
                     entry.date,
                     AmountCounter(positive_amount),
                     json.loads(meta.group(1)) if meta else None
                 )
             )
-        excess_amount = _pay_counters(positive_entries, excess_amount + negative_amount, entry.date)
-    return [AccountAge(entry.date, entry.counter, entry.meta) for entry in positive_entries]
+        state.excess_amount = __pay_counters(state.positive_entries, state.excess_amount + negative_amount, entry.date)
+        state.sl_no = entry.sl_no
+    return [AccountAge(entry.date, entry.counter, entry.meta) for entry in state.positive_entries], state
