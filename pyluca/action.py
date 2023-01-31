@@ -12,7 +12,11 @@ _OPERATOR_CONFIG = {
     '/': lambda a, b: a / b,
     'min': lambda a, b: min(a, b),
     '==': lambda a, b: a == b,
-    '!': lambda a, b: not a
+    '!': lambda a, b: not a,
+    '>': lambda a, b: a > b,
+    '<': lambda a, b: a < b,
+    '>=': lambda a, b: a >= b,
+    '<=': lambda a, b: a <= b
 }
 
 
@@ -69,7 +73,8 @@ def _apply_action(
         event: Event,
         accountant: Accountant,
         context: dict,
-        common_actions: dict
+        common_actions: dict,
+        external_actions: dict
 ):
     if action.get('iff') and not _get_param(action['iff'], event, accountant, context):
         return
@@ -84,12 +89,23 @@ def _apply_action(
         )
     elif action_type.startswith('action.'):
         for sub_action in common_actions[action_type.replace('action.', '')]['actions']:
-            _apply_action(sub_action, event, accountant, {**context, **action.get('context', {})}, common_actions)
+            _apply_action(
+                sub_action, event, accountant,
+                {**context, **action.get('context', {})},
+                common_actions,
+                external_actions
+            )
+    elif action_type.startswith('external_action.'):
+        kwargs = {k: _get_param(v, event, accountant, context) for k, v in action.get('context', {}).items()}
+        external_actions[action_type.replace('external_action.', '')](**kwargs)
+    else:
+        raise NotImplementedError(f'"{action_type}" is not a valid action type!')
 
 
-def apply(event: Event, accountant: Accountant, context: dict = None):
+def apply(event: Event, accountant: Accountant, context: dict = None, external_actions: dict = None):
     context = context if context else {}
     event_config = accountant.config['actions_config']['on_event'][event.__class__.__name__]
     common_actions = accountant.config['actions_config'].get('common_actions', {})
+    external_actions = external_actions if external_actions else {}
     for action in event_config['actions']:
-        _apply_action(action, event, accountant, context, common_actions)
+        _apply_action(action, event, accountant, context, common_actions, external_actions)
