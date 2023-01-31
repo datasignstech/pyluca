@@ -19,7 +19,7 @@ class Accountant:
     ):
         if amount == 0:
             return
-        assert not any([i for i in self.journal.entries if date < i.date]), f'Backdated journal entries cannot be added'
+        assert not any([entry for entry in self.journal.entries if date < entry.date]), f'Backdated journal entries cannot be added'
         self.journal.entries.append(
             JournalEntry(len(self.journal.entries), dr_account, amount, 0, date, narration, self.key))
         self.journal.entries.append(
