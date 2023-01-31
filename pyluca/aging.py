@@ -58,7 +58,7 @@ def get_account_aging(
         state = AgingState(account, [], 0, -1)
 
     if state.account != account:
-        raise ValueError('Invalid previous state provided. account should match')
+        raise ValueError('Invalid previous state! account not matching')
 
     account_type = config['accounts'][account]['type']
     for entry in entries:
