@@ -24,7 +24,7 @@ class JournalEntry:
 class Journal:
     def __init__(self, entries: List[JournalEntry] = None):
         self.entries: List[JournalEntry] = [] if entries is None else entries
-        self.max_date: datetime = None
+        self.max_date: datetime = None if not entries else max([entry.date for entry in entries])
 
     def add_entry(self, entry: JournalEntry):
         if self.max_date is None:
