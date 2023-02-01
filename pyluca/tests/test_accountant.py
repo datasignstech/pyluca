@@ -36,3 +36,13 @@ class TestAccountant(TestCase):
             bal[acct_name] = ledger.get_account_balance(acct_name)
             acct_type_bal[acct['type']] += bal[acct_name]
         self.assertEqual(acct_type_bal['ASSET'], acct_type_bal['INCOME'] - acct_type_bal['EXPENSE'])
+
+    def test_enter_journal(self):
+        accountant = Accountant(Journal(), account_config, 'person2')
+        accountant.enter_journal('SAVINGS_BANK', 'SALARY', 30000, datetime(2023, 1, 31), 'Jan salary')
+        self.assertEqual(accountant.journal.max_date, datetime(2023, 1, 31))
+
+        self.assertRaises(
+            AssertionError,
+            lambda: accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2023, 1, 1), 'Loans')
+        )

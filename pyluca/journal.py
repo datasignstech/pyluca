@@ -24,3 +24,11 @@ class JournalEntry:
 class Journal:
     def __init__(self, entries: List[JournalEntry] = None):
         self.entries: List[JournalEntry] = [] if entries is None else entries
+        self.max_date: datetime = max([entry.date for entry in entries]) if entries else None
+
+    def add_entry(self, entry: JournalEntry):
+        if self.max_date is None:
+            self.max_date = entry.date
+        assert entry.date >= self.max_date, f'Backdated entries cannot be added'
+        self.entries.append(entry)
+        self.max_date = entry.date
