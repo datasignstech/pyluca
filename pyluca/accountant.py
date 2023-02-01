@@ -17,12 +17,11 @@ class Accountant:
             date: datetime.datetime,
             narration: str
     ):
-        assert not any([entry for entry in self.journal.entries if date < entry.date]), f'Backdated journal entries cannot be added'
         if amount == 0:
             return
-        self.journal.entries.append(
+        self.journal.add_entry(
             JournalEntry(len(self.journal.entries), dr_account, amount, 0, date, narration, self.key))
-        self.journal.entries.append(
+        self.journal.add_entry(
             JournalEntry(len(self.journal.entries), cr_account, 0, amount, date, narration, self.key))
 
     def record(self, rule: str, amount: float, date: datetime.datetime, note: str = '', meta: dict = None):
