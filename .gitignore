@@ -1,3 +1,4 @@
 .idea
 pyluca.egg-info
 venv
+docs/_build
