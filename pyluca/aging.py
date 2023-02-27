@@ -1,6 +1,5 @@
 import json
 import re
-from copy import deepcopy
 from datetime import datetime
 from typing import NamedTuple, List, Optional, Tuple
 from pyluca.account_config import BalanceType
@@ -48,7 +47,7 @@ def get_account_aging(
         return e.date <= as_of and e.account == account \
                and (previous_aging is None or e.sl_no > previous_aging.last_sl_no)
 
-    aging = deepcopy(previous_aging)
+    aging = previous_aging
     if aging is None:
         aging = AccountAging(account, [], 0, -1)
 
