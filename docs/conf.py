@@ -8,7 +8,7 @@
 
 import os
 import sys
-sys.path.append('/Users/pskd73/pyluca')
+sys.path.insert(0, os.path.abspath('..'))
 
 
 project = 'pyluca'
