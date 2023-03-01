@@ -3,6 +3,17 @@ from typing import List
 
 
 class JournalEntry:
+    """
+    A struct for individual journal entry.
+
+    :param sl_no: sl_no of the entry (starting from 1)
+    :param account: The account which the entry is passed for
+    :param dr_amount: Debit amount
+    :param cr_amount: Credit amount
+    :param date: Time of occurrence
+    :param narration: A narration or description for the entry
+    :param key: A key to group the journal entries
+    """
     def __init__(
             self, sl_no: int,
             account: str,
@@ -22,5 +33,25 @@ class JournalEntry:
 
 
 class Journal:
+    """
+    A log which maintains list of journal entries.
+
+    :param entries: An optional opening journal entries
+    """
     def __init__(self, entries: List[JournalEntry] = None):
         self.entries: List[JournalEntry] = [] if entries is None else entries
+        self.max_date: datetime = max([entry.date for entry in entries]) if entries else None
+
+    def add_entry(self, entry: JournalEntry):
+        """
+        Function which takes an entry and adds to the entries after validation on date. Raises
+        exception if passed entry is back dated
+
+        :param entry: Entry to be added
+        :raises: AssertionError
+        """
+        if self.max_date is None:
+            self.max_date = entry.date
+        assert entry.date >= self.max_date, f'Backdated entries cannot be added'
+        self.entries.append(entry)
+        self.max_date = entry.date
