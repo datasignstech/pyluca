@@ -1,4 +1,4 @@
-pyluca
+API
 ======
 
 .. toctree::
@@ -13,4 +13,3 @@ pyluca
    event
    journal
    ledger
-   recon

@@ -4,6 +4,8 @@ It is a plug and play python module, which does NOT come with any server or data
 It helps you to build your own application using core double entry accounting (pyluca)
 module.
 
+Read the [documentation here](https://pyluca.readthedocs.io)
+
 ## Usage
 On a high level, you just need to do following steps to start using it.
 1. Setup accounting configuration
