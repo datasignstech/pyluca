@@ -8,9 +8,16 @@ Welcome to pyluca's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
 
+   get_started
+   setup_accounting_config
+   setup_chart_of_accounts
+   pass_journal_entries
+   get_balances
+   misc
+   setup_events
    modules
 
 

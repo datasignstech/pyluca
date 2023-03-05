@@ -1,4 +1,4 @@
-accountant module
+accountant
 =================
 
 .. automodule:: pyluca.accountant
