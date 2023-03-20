@@ -16,14 +16,14 @@ class Accountant:
             amount: float,
             date: datetime.datetime,
             narration: str,
-            voucher_id: str = ''
+            event_id: str = ''
     ):
         if amount == 0:
             return
         self.journal.add_entry(
-            JournalEntry(len(self.journal.entries), dr_account, amount, 0, date, narration, self.key, voucher_id))
+            JournalEntry(len(self.journal.entries), dr_account, amount, 0, date, narration, self.key, event_id))
         self.journal.add_entry(
-            JournalEntry(len(self.journal.entries), cr_account, 0, amount, date, narration, self.key, voucher_id))
+            JournalEntry(len(self.journal.entries), cr_account, 0, amount, date, narration, self.key, event_id))
 
     def record(
             self,
@@ -32,7 +32,7 @@ class Accountant:
             date: datetime.datetime,
             note: str = '',
             meta: dict = None,
-            voucher_id: str = ''
+            event_id: str = ''
     ):
         rule = self.config['rules'][rule]
         narration = f'{rule["narration"]} {note}'
@@ -45,7 +45,7 @@ class Accountant:
                 amount,
                 date,
                 narration,
-                voucher_id
+                event_id
             )
 
     def adjust(self, dr_acct: str, cr_acct: str, amount: float, date: datetime.datetime):

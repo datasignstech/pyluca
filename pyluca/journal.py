@@ -13,7 +13,7 @@ class JournalEntry:
     :param date: Time of occurrence
     :param narration: A narration or description for the entry
     :param key: A key to group the journal entries
-    :param voucher_id: Identifier for voucher caused this entry
+    :param event_id: Identifier for event caused this entry
     """
     def __init__(
             self, sl_no: int,
@@ -23,7 +23,7 @@ class JournalEntry:
             date: datetime.datetime,
             narration: str,
             key: str,
-            voucher_id: str = ''
+            event_id: str = ''
     ):
         self.sl_no = sl_no
         self.account = account
@@ -32,7 +32,7 @@ class JournalEntry:
         self.date = date
         self.narration = narration
         self.key = key
-        self.voucher_id = voucher_id
+        self.event_id = event_id
 
 
 class Journal:
