@@ -31,7 +31,7 @@ def _get_param(
         key: Union[str, list, dict],
         event: Event,
         accountant: Accountant,
-        context: dict,
+        context: dict
 ):
     if key is None:
         return None
@@ -74,7 +74,7 @@ def _apply_action(
         accountant: Accountant,
         context: dict,
         common_actions: dict,
-        external_actions: dict,
+        external_actions: dict
 ):
     if action.get('iff') and not _get_param(action['iff'], event, accountant, context):
         return
