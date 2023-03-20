@@ -89,7 +89,8 @@ def _apply_action(
             action['cr_account'],
             _get_param(action['amount'], event, accountant, context, opening_balances),
             event.date,
-            _get_narration(action, event, accountant, context, opening_balances)
+            _get_narration(action, event, accountant, context, opening_balances),
+            event.event_id
         )
     elif action_type.startswith('action.'):
         for sub_action in common_actions[action_type.replace('action.', '')]['actions']:
