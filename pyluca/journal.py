@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Optional
 
 
 class JournalEntry:
@@ -23,7 +23,7 @@ class JournalEntry:
             date: datetime.datetime,
             narration: str,
             key: str,
-            event_id: str = ''
+            event_id: Optional[str]
     ):
         self.sl_no = sl_no
         self.account = account
