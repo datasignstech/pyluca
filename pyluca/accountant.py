@@ -1,5 +1,6 @@
 import datetime
 import json
+from typing import Optional
 from pyluca.journal import Journal, JournalEntry
 
 
@@ -16,7 +17,7 @@ class Accountant:
             amount: float,
             date: datetime.datetime,
             narration: str,
-            event_id: str = ''
+            event_id: Optional[str] = None
     ):
         if amount == 0:
             return
@@ -32,7 +33,7 @@ class Accountant:
             date: datetime.datetime,
             note: str = '',
             meta: dict = None,
-            event_id: str = ''
+            event_id: Optional[str] = None
     ):
         rule = self.config['rules'][rule]
         narration = f'{rule["narration"]} {note}'
