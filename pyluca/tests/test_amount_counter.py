@@ -6,7 +6,7 @@ from pyluca.amount_counter import AmountCounter
 
 class TestAmountCounter(TestCase):
     def test_amount_counter(self):
-        counter = AmountCounter(1000)
+        counter = AmountCounter(1000, None)
         now = datetime.now()
         self.assertEqual(counter.pay(0, now)[1], 0)
         self.assertEqual(counter.pay(5, now)[1], 0)
@@ -22,7 +22,7 @@ class TestAmountCounter(TestCase):
         self.assertTrue(counter.is_paid())
 
     def test_payments(self):
-        counter = AmountCounter(1000)
+        counter = AmountCounter(1000, None)
         counter.pay(33.3, datetime(2022, 4, 20))
         self.assertEqual(counter.get_balance(), 966.7)
         self.assertEqual(len(counter.payments), 1)
