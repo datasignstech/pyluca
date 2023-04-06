@@ -66,7 +66,7 @@ def get_account_aging(
             aging.ages.append(
                 AccountAge(
                     entry.date,
-                    AmountCounter(positive_amount, entry.event_id),
+                    AmountCounter(positive_amount),
                     json.loads(meta.group(1)) if meta else None
                 )
             )

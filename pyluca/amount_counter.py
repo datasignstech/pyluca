@@ -25,10 +25,9 @@ class AmountCounterInterface:
 
 
 class AmountCounter(AmountCounterInterface):
-    def __init__(self, total_amount: float, event_id: Optional[str]):
+    def __init__(self, total_amount: float):
         self.total_amount = total_amount
         self.paid_amount = 0
-        self.event_id = event_id
         self.payments: List[AccountPayment] = []
 
     def add(self, amount: float):
