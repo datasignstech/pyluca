@@ -1,7 +1,7 @@
 import json
 import re
 from datetime import datetime
-from typing import NamedTuple, List, Optional, Tuple
+from typing import NamedTuple, List, Optional
 from pyluca.account_config import BalanceType
 from pyluca.journal import JournalEntry
 from pyluca.amount_counter import AmountCounter
@@ -11,6 +11,7 @@ class AccountAge(NamedTuple):
     date: datetime
     counter: AmountCounter
     meta: Optional[dict]
+    event_id: Optional[str]
 
 
 class AccountAging:
@@ -67,7 +68,8 @@ def get_account_aging(
                 AccountAge(
                     entry.date,
                     AmountCounter(positive_amount),
-                    json.loads(meta.group(1)) if meta else None
+                    json.loads(meta.group(1)) if meta else None,
+                    entry.event_id
                 )
             )
         aging.excess_amount = __pay_counters(aging.ages, aging.excess_amount + negative_amount, entry.date)
