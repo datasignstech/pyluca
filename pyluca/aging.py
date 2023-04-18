@@ -11,8 +11,7 @@ class AccountAge(NamedTuple):
     date: datetime
     counter: AmountCounter
     meta: Optional[dict]
-    event_id: Optional[str]
-    narration: str
+    je: JournalEntry
 
 
 class AccountAging:
@@ -70,8 +69,7 @@ def get_account_aging(
                     entry.date,
                     AmountCounter(positive_amount),
                     json.loads(meta.group(1)) if meta else None,
-                    entry.event_id,
-                    entry.narration
+                    entry
                 )
             )
         aging.excess_amount = __pay_counters(aging.ages, aging.excess_amount + negative_amount, entry.date)
