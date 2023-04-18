@@ -11,7 +11,7 @@ class AccountAge(NamedTuple):
     date: datetime
     counter: AmountCounter
     meta: Optional[dict]
-    je: JournalEntry
+    journal_entry: JournalEntry
 
 
 class AccountAging:
