@@ -12,7 +12,7 @@ class AccountAge(NamedTuple):
     counter: AmountCounter
     meta: Optional[dict]
     event_id: Optional[str]
-    entry_narration: str
+    narration: str
 
 
 class AccountAging:
