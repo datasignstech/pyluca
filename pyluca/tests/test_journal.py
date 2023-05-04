@@ -1,6 +1,6 @@
 from datetime import datetime
 from unittest import TestCase
-from pyluca.journal import Journal, JournalEntry
+from pyluca.journal import Journal, JournalEntry, InvalidEntryException
 
 
 class TestJournal(TestCase):
@@ -25,8 +25,7 @@ class TestJournal(TestCase):
         journal.add_entry(JournalEntry(6, 'LOANS', 0, 2500, datetime(2023, 2, 2), 'Loans Payback', 'person2', None))
         self.assertEqual(journal.max_date, datetime(2023, 2, 2))
 
-        self.assertRaises(AssertionError, lambda: journal.add_entry(
+        self.assertRaises(InvalidEntryException, lambda: journal.add_entry(
             JournalEntry(7, 'SAVINGS_BANK', 2000, 0, datetime(2023, 2, 1), 'Invest something', 'person2', None)
         ))
-
 
