@@ -29,4 +29,3 @@ class TestJournal(TestCase):
             JournalEntry(7, 'SAVINGS_BANK', 2000, 0, datetime(2023, 2, 1), 'Invest something', 'person2', None)
         ))
 
-
