@@ -55,6 +55,7 @@ class Journal:
         """
         if self.max_date is None:
             self.max_date = entry.date
-        assert entry.date >= self.max_date, f'Backdated entries cannot be added'
+        assert entry.date >= self.max_date, \
+            f'Backdated entries cannot be added for entry_date: {entry.date.strftime("%d-%m-%Y %H:%M:%S")} and max_date: {self.max_date.strftime("%d-%m-%Y %H:%M:%S")}'
         self.entries.append(entry)
         self.max_date = entry.date
