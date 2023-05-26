@@ -2,6 +2,10 @@ import datetime
 from typing import List, Optional
 
 
+class InvalidEntryException(Exception):
+    pass
+
+
 class JournalEntry:
     """
     A struct for individual journal entry.
@@ -51,10 +55,13 @@ class Journal:
         exception if passed entry is back dated
 
         :param entry: Entry to be added
-        :raises: AssertionError
+        :raises: InvalidEntryException
         """
         if self.max_date is None:
             self.max_date = entry.date
-        assert entry.date >= self.max_date, f'Backdated entries cannot be added'
+        if entry.date < self.max_date:
+            raise InvalidEntryException(
+                f'Backdated entries cannot be added for entry_date: {entry.date.strftime("%d-%m-%Y %H:%M:%S")} and max_date: {self.max_date.strftime("%d-%m-%Y %H:%M:%S")}'
+            )
         self.entries.append(entry)
         self.max_date = entry.date

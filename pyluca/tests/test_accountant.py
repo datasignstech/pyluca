@@ -3,7 +3,7 @@ from datetime import datetime
 from unittest import TestCase
 
 from pyluca.accountant import Accountant
-from pyluca.journal import Journal
+from pyluca.journal import Journal, InvalidEntryException
 from pyluca.ledger import Ledger
 from pyluca.tests.test_aging import account_config
 
@@ -43,6 +43,6 @@ class TestAccountant(TestCase):
         self.assertEqual(accountant.journal.max_date, datetime(2023, 1, 31))
 
         self.assertRaises(
-            AssertionError,
+            InvalidEntryException,
             lambda: accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2023, 1, 1), 'Loans')
         )
