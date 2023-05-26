@@ -130,7 +130,7 @@ class TestAging(TestCase):
         self.assertFalse(age2.counter.is_paid())
         self.assertEqual(age1.counter.get_balance(), 0)
         self.assertNotEqual(age2.counter.get_balance(), 0)
-        self.assertAlmostEqual(age2.counter.get_balance(), 0.000014)
+        self.assertAlmostEqual(age2.counter.get_balance(), 0)
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertAlmostEqual(ledger.get_account_balance('LOANS'), 0, 4)
 
