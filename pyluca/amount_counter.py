@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import List, Optional, Tuple
 
 
-TOLERANCE_FLOATING = 1e-5
+TOLERANCE_FLOATING = 1e-2
 
 
 class AccountPayment:
