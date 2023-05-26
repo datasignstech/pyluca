@@ -109,9 +109,9 @@ class TestAging(TestCase):
 
         accountant = Accountant(Journal(), account_config, 'person1')
         accountant.enter_journal('SAVINGS_BANK', 'SALARY', 200, datetime(2022, 8, 9), 'Salary')
-        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 100.128839293829282838283823, datetime(2022, 8, 10),
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 100.998839293829282838283823, datetime(2022, 8, 10),
                                  'XYZ client')
-        accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 100.1288, datetime(2022, 8, 10), 'XYZ client')
+        accountant.enter_journal('LOANS_PAYBACK', 'LOANS', 100.1088, datetime(2022, 8, 10), 'XYZ client')
         aging = get_account_aging(account_config, accountant.journal.entries, 'LOANS', datetime(2022, 8, 11))
         age = aging.ages[0]
         self.assertFalse(age.counter.is_paid())
