@@ -25,8 +25,9 @@ class AmountCounterInterface:
 
 
 class AmountCounter(AmountCounterInterface):
-    def __init__(self, total_amount: float):
+    def __init__(self, total_amount: float, tolerance: float = TOLERANCE_FLOATING):
         self.total_amount = total_amount
+        self.tolerance = tolerance
         self.paid_amount = 0
         self.payments: List[AccountPayment] = []
 
@@ -50,7 +51,7 @@ class AmountCounter(AmountCounterInterface):
         return self.total_amount - self.paid_amount
 
     def is_paid(self):
-        return abs(self.get_balance()) < TOLERANCE_FLOATING
+        return abs(self.get_balance()) < self.tolerance
 
     def get_paid_amount(self):
         return self.paid_amount
