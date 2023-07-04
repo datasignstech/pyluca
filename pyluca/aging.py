@@ -56,10 +56,10 @@ def get_account_aging(
         raise ValueError('Invalid previous aging! account not matching')
 
     account_type = config['accounts'][account]['type']
+    account_balance_type = config['account_types'][account_type]['balance_type']
     for entry in entries:
         if not should_entry_applied(entry):
             continue
-        account_balance_type = config['account_types'][account_type]['balance_type']
         positive_amount = entry.cr_amount if account_balance_type == BalanceType.CREDIT.value else entry.dr_amount
         negative_amount = entry.dr_amount if account_balance_type == BalanceType.CREDIT.value else entry.cr_amount
         if positive_amount > 0:
