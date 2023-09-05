@@ -82,7 +82,8 @@ def get_account_aging(
     if aging.account != account:
         raise ValueError('Invalid previous aging! account not matching')
 
-    account_balance_type = config['account_types'][config['accounts'][account]['type']]['balance_type']
+    account_type = config['accounts'][account]['type']
+    account_balance_type = config['account_types'][account_type]['balance_type']
     for entry in entries:
         if not should_entry_applied(entry):
             continue
@@ -114,6 +115,7 @@ def get_accounts_aging(
     for entry in entries:
         if not should_entry_applied(entry):
             continue
-        account_balance_type = config['account_types'][config['accounts'][entry.account]['type']]['balance_type']
+        account_type = config['accounts'][entry.account]['type']
+        account_balance_type = config['account_types'][account_type]['balance_type']
         __update_account_aging(account_balance_type, entry, aging[entry.account])
     return aging
