@@ -7,9 +7,10 @@ TOLERANCE_FLOATING = 1e-5
 
 
 class AccountPayment:
-    def __init__(self, amount: float, date: datetime):
+    def __init__(self, amount: float, date: datetime, meta: dict = None):
         self.amount = amount
         self.date = date
+        self.meta = meta
 
 
 class AccountWriterInterface:
@@ -20,7 +21,7 @@ class AccountWriterInterface:
 
 class AmountCounterInterface:
     @abstractmethod
-    def pay(self, amount: float, date: datetime) -> Tuple[Optional[AccountPayment], float]:
+    def pay(self, amount: float, date: datetime, meta: dict = None) -> Tuple[Optional[AccountPayment], float]:
         pass
 
 
@@ -34,14 +35,14 @@ class AmountCounter(AmountCounterInterface):
     def add(self, amount: float):
         self.total_amount += amount
 
-    def pay(self, amount: float, date: datetime):
+    def pay(self, amount: float, date: datetime, meta: dict = None):
         if amount < 0:
             raise ValueError('Pay amount should not be less than 0')
         if self.is_paid():
             return None, amount
         possible_pay_amount = min(self.get_balance(), amount)
         if possible_pay_amount > 0:
-            payment = AccountPayment(possible_pay_amount, date)
+            payment = AccountPayment(possible_pay_amount, date, meta)
             self.payments.append(payment)
             self.paid_amount += possible_pay_amount
             return payment, amount - possible_pay_amount
