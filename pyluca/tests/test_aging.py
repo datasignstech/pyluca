@@ -257,3 +257,26 @@ class TestAging(TestCase):
                 datetime(2022, 8, 12), previous_aging=aging
             )
         self.assertEqual(e.exception.__str__(), 'Invalid previous aging! accounts not matching')
+
+    def test_with_meta_ac_payments(self):
+        accountant = Accountant(Journal(), account_config, 'person1')
+        accountant.enter_journal('SAVINGS_BANK', 'LOANS', 200, datetime(2022, 8, 9), 'Salary', 'event1')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 50, datetime(2022, 8, 10), 'To a', 'event2')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 150, datetime(2022, 8, 10), 'To b', 'event3')
+        aging = get_account_aging(
+            account_config, accountant.journal.entries, 'SAVINGS_BANK', datetime(2022, 8, 10)
+        )
+        age = aging.ages[0]
+        self.assertEqual(age.counter.is_paid(), True)
+        self.assertEqual(len(age.counter.payments), 2)
+        self.assertEqual(age.counter.payments[0].amount, 50)
+        self.assertEqual(age.counter.payments[0].meta['entry']['event_id'], 'event2')
+        self.assertEqual(age.counter.payments[1].meta['entry']['event_id'], 'event3')
+
+        agings = get_accounts_aging(
+            account_config, accountant.journal.entries, ['SAVINGS_BANK', 'LOANS'], datetime(2022, 8, 10)
+        )
+        age = agings['SAVINGS_BANK'].ages[0]
+        self.assertEqual(age.counter.payments[0].meta['entry']['event_id'], 'event2')
+        self.assertEqual(age.counter.payments[1].meta['entry']['event_id'], 'event3')
+

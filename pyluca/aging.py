@@ -30,14 +30,20 @@ class AccountAging:
         self.last_unpaid_age_idx = last_unpaid_age_idx
 
 
-def __pay_counters(ages: List[AccountAge], amount: float, date: datetime, last_unpaid_age_idx) -> Tuple[float, int]:
+def __pay_counters(
+        ages: List[AccountAge],
+        amount: float,
+        date: datetime,
+        entry: JournalEntry,
+        last_unpaid_age_idx
+) -> Tuple[float, int]:
     if len(ages) == 0:
         return amount, last_unpaid_age_idx
     if amount == 0:
         return 0, last_unpaid_age_idx
     rem_amount = amount
     while rem_amount > 0 and last_unpaid_age_idx < len(ages):
-        _, rem_amount = ages[last_unpaid_age_idx].counter.pay(rem_amount, date)
+        _, rem_amount = ages[last_unpaid_age_idx].counter.pay(rem_amount, date, {'entry': entry.__dict__})
         if ages[last_unpaid_age_idx].counter.is_paid():
             last_unpaid_age_idx += 1
         else:
@@ -59,7 +65,11 @@ def __update_account_aging(account_balance_type: str, entry: JournalEntry, aging
             )
         )
     aging.excess_amount, aging.last_unpaid_age_idx = __pay_counters(
-        aging.ages, aging.excess_amount + negative_amount, entry.date, aging.last_unpaid_age_idx
+        aging.ages,
+        aging.excess_amount + negative_amount,
+        entry.date,
+        entry,
+        aging.last_unpaid_age_idx
     )
     aging.last_sl_no = entry.sl_no
 
