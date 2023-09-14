@@ -13,6 +13,7 @@ _OPERATOR_CONFIG = {
     'min': lambda a, b: min(a, b),
     'max': lambda a, b: max(a, b),
     '==': lambda a, b: a == b,
+    '!=': lambda a, b: a != b,
     '!': lambda a, b: not a,
     '>': lambda a, b: a > b,
     '<': lambda a, b: a < b,
