@@ -1,6 +1,5 @@
 from datetime import datetime
 from unittest import TestCase
-
 from pyluca.accountant import Accountant
 from pyluca.journal import Journal, JournalEntry
 from pyluca.ledger import Ledger
@@ -77,3 +76,49 @@ class TestLedger(TestCase):
         self.assertEqual(accounts_balance['MUTUAL_FUNDS'], 10000)
         self.assertEqual(accounts_balance['LOANS'], 5000)
         self.assertEqual(accounts_balance['CAR_EMI'], 3000)
+
+    def test_get_account_balance_as_of(self):
+        accountant = Accountant(Journal(), account_config, '3')
+        accountant.enter_journal('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30), 'April salary')
+        accountant.enter_journal('MUTUAL_FUNDS', 'SAVINGS_BANK', 10000, datetime(2022, 5, 1), 'ELSS')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2022, 5, 2), 'Lend to Pramod')
+        accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2), 'EMI 3/48')
+        ledger = Ledger(accountant.journal, account_config)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK', datetime(2022, 4, 29)), 0)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK', datetime(2022, 4, 30)), 20000)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK', datetime(2022, 5, 1)), 10000)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK', datetime(2022, 5, 2)), 2000)
+        self.assertEqual(
+            ledger.get_account_balance('SAVINGS_BANK'),
+            ledger.get_account_balance('SAVINGS_BANK', datetime(2022, 5, 2))
+        )
+
+    def test_get_accounts_balance_as_of(self):
+        accountant = Accountant(Journal(), account_config, '3')
+        accountant.enter_journal('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30), 'April salary')
+        accountant.enter_journal('MUTUAL_FUNDS', 'SAVINGS_BANK', 10000, datetime(2022, 5, 1), 'ELSS')
+        accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2022, 5, 2), 'Lend to Pramod')
+        accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2), 'EMI 3/48')
+        ledger = Ledger(accountant.journal, account_config)
+
+        accounts_balance = ledger.get_balances(datetime(2022, 4, 29))
+        self.assertEqual(accounts_balance['SAVINGS_BANK'], 0)
+        self.assertEqual(accounts_balance['SALARY'], 0)
+        self.assertEqual(accounts_balance['MUTUAL_FUNDS'], 0)
+        self.assertEqual(accounts_balance['LOANS'], 0)
+        self.assertEqual(accounts_balance['CAR_EMI'], 0)
+
+        accounts_balance = ledger.get_balances(datetime(2022, 4, 30))
+        self.assertEqual(accounts_balance['SAVINGS_BANK'], 20000)
+        self.assertEqual(accounts_balance['SALARY'], 20000)
+
+        accounts_balance = ledger.get_balances(datetime(2022, 5, 1))
+        self.assertEqual(accounts_balance['SAVINGS_BANK'], 10000)
+        self.assertEqual(accounts_balance['MUTUAL_FUNDS'], 10000)
+
+        accounts_balance = ledger.get_balances(datetime(2022, 5, 2))
+        self.assertEqual(accounts_balance['SAVINGS_BANK'], 2000)
+        self.assertEqual(accounts_balance['LOANS'], 5000)
+        self.assertEqual(accounts_balance['CAR_EMI'], 3000)
+
+        self.assertEqual(ledger.get_balances(), ledger.get_balances(datetime(2022, 5, 2)))

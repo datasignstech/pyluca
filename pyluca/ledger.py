@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 from collections import defaultdict
 import pandas as pd
 from pyluca.account_config import BalanceType
@@ -12,21 +13,26 @@ class Ledger:
         self.journal = journal
         self.config = config
 
-    def get_account_dr(self, account: str):
-        return sum([j.dr_amount for j in self.journal.entries if j.account == account])
+    def journal_entries_as_of(self, as_of: Optional[datetime]):
+        if as_of is not None:
+            return [entry for entry in self.journal.entries if entry.date <= as_of]
+        return self.journal.entries
 
-    def get_account_cr(self, account: str):
-        return sum([j.cr_amount for j in self.journal.entries if j.account == account])
+    def get_account_dr(self, account: str, as_of: Optional[datetime] = None):
+        return sum([j.dr_amount for j in self.journal_entries_as_of(as_of) if j.account == account])
 
-    def get_account_balance(self, account: str):
+    def get_account_cr(self, account: str, as_of: Optional[datetime] = None):
+        return sum([j.cr_amount for j in self.journal_entries_as_of(as_of) if j.account == account])
+
+    def get_account_balance(self, account: str, as_of: Optional[datetime] = None):
         assert self.config['accounts'][account]['type'] in self.config['account_types']
         if self.config['account_types'][self.config['accounts'][account]['type']]['balance_type'] == BalanceType.DEBIT.value:
-            return self.get_account_dr(account) - self.get_account_cr(account)
-        return self.get_account_cr(account) - self.get_account_dr(account)
+            return self.get_account_dr(account, as_of) - self.get_account_cr(account, as_of)
+        return self.get_account_cr(account, as_of) - self.get_account_dr(account, as_of)
 
-    def get_balances(self) -> dict:
+    def get_balances(self, as_of: Optional[datetime] = None) -> dict:
         accounts_balance = defaultdict(float)
-        for je in self.journal.entries:
+        for je in self.journal_entries_as_of(as_of):
             if self.config['account_types'][self.config['accounts'][je.account]['type']]['balance_type'] == BalanceType.DEBIT.value:
                 accounts_balance[je.account] += (je.dr_amount - je.cr_amount)
             else:
