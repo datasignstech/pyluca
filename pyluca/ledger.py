@@ -15,7 +15,13 @@ class Ledger:
 
     def journal_entries_as_of(self, as_of: Optional[datetime]):
         if as_of is not None:
-            return [entry for entry in self.journal.entries if entry.date <= as_of]
+            entries = []
+            for entry in self.journal.entries:
+                if entry.date <= as_of:
+                    entries.append(entry)
+                else:
+                    break
+            return entries
         return self.journal.entries
 
     def get_account_dr(self, account: str, as_of: Optional[datetime] = None):
