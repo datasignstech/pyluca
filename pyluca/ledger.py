@@ -13,36 +13,42 @@ class Ledger:
         self.journal = journal
         self.config = config
 
-    def journal_entries_as_of(self, as_of: Optional[datetime]):
-        if as_of is not None:
-            entries = []
-            for entry in self.journal.entries:
-                if entry.date <= as_of:
-                    entries.append(entry)
-                else:
-                    break
-            return entries
-        return self.journal.entries
-
     def get_account_dr(self, account: str, as_of: Optional[datetime] = None):
-        return sum([j.dr_amount for j in self.journal_entries_as_of(as_of) if j.account == account])
+        if as_of is not None:
+            return sum([j.dr_amount for j in self.journal.entries if j.account == account and j.date <= as_of])
+        return sum([j.dr_amount for j in self.journal.entries if j.account == account])
 
     def get_account_cr(self, account: str, as_of: Optional[datetime] = None):
-        return sum([j.cr_amount for j in self.journal_entries_as_of(as_of) if j.account == account])
+        if as_of is not None:
+            return sum([j.cr_amount for j in self.journal.entries if j.account == account and j.date <= as_of])
+        return sum([j.cr_amount for j in self.journal.entries if j.account == account])
 
     def get_account_balance(self, account: str, as_of: Optional[datetime] = None):
         assert self.config['accounts'][account]['type'] in self.config['account_types']
+        if as_of is not None:
+            if self.config['account_types'][self.config['accounts'][account]['type']]['balance_type'] == BalanceType.DEBIT.value:
+                return sum([je.dr_amount - je.cr_amount for je in self.journal.entries if je.account == account and je.date <= as_of])
+            return sum([je.cr_amount - je.dr_amount for je in self.journal.entries if je.account == account and je.date <= as_of])
+
         if self.config['account_types'][self.config['accounts'][account]['type']]['balance_type'] == BalanceType.DEBIT.value:
-            return sum([je.dr_amount - je.cr_amount for je in self.journal_entries_as_of(as_of) if je.account == account])
-        return sum([je.cr_amount - je.dr_amount for je in self.journal_entries_as_of(as_of) if je.account == account])
+            return sum([je.dr_amount - je.cr_amount for je in self.journal.entries if je.account == account])
+        return sum([je.cr_amount - je.dr_amount for je in self.journal.entries if je.account == account])
 
     def get_balances(self, as_of: Optional[datetime] = None) -> dict:
         accounts_balance = defaultdict(float)
-        for je in self.journal_entries_as_of(as_of):
+        for je in self.journal.entries:
             if self.config['account_types'][self.config['accounts'][je.account]['type']]['balance_type'] == BalanceType.DEBIT.value:
-                accounts_balance[je.account] += (je.dr_amount - je.cr_amount)
+                if as_of is not None:
+                    if je.date <= as_of:
+                        accounts_balance[je.account] += (je.dr_amount - je.cr_amount)
+                else:
+                    accounts_balance[je.account] += (je.dr_amount - je.cr_amount)
             else:
-                accounts_balance[je.account] += (je.cr_amount - je.dr_amount)
+                if as_of is not None:
+                    if je.date <= as_of:
+                        accounts_balance[je.account] += (je.cr_amount - je.dr_amount)
+                else:
+                    accounts_balance[je.account] += (je.cr_amount - je.dr_amount)
         return accounts_balance
 
     def get_df(self) -> pd.DataFrame:
@@ -70,6 +76,3 @@ class Ledger:
             if account['type'] == account_type and account_name not in exclude_accounts:
                 balance += self.get_account_balance(account_name)
         return balance
-
-
-
