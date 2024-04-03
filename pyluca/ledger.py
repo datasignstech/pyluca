@@ -33,8 +33,8 @@ class Ledger:
     def get_account_balance(self, account: str, as_of: Optional[datetime] = None):
         assert self.config['accounts'][account]['type'] in self.config['account_types']
         if self.config['account_types'][self.config['accounts'][account]['type']]['balance_type'] == BalanceType.DEBIT.value:
-            return self.get_account_dr(account, as_of) - self.get_account_cr(account, as_of)
-        return self.get_account_cr(account, as_of) - self.get_account_dr(account, as_of)
+            return sum([je.dr_amount - je.cr_amount for je in self.journal_entries_as_of(as_of) if je.account == account])
+        return sum([je.cr_amount - je.dr_amount for je in self.journal_entries_as_of(as_of) if je.account == account])
 
     def get_balances(self, as_of: Optional[datetime] = None) -> dict:
         accounts_balance = defaultdict(float)
