@@ -13,7 +13,7 @@ class InvalidLedgerEntry(Exception):
 
 
 class LedgerEntry(NamedTuple):
-    date: datetime
+    date: Optional[datetime]
     dr_amount: float
     cr_amount: float
     narration: str
@@ -22,37 +22,43 @@ class LedgerEntry(NamedTuple):
 
 
 class AccountLedger:
-    def __init__(self, account_name: str, balance_type: BalanceType):
+    def __init__(self, account_name: str, balance_type: BalanceType, opening_balance: float = 0):
         self.account_name = account_name
         self.balance_type = balance_type
-        self.__balance: float = 0
         self.__entries: List[LedgerEntry] = []
-        self.__max_entry_date: Optional[datetime] = None
+        self.__entries.append(
+            LedgerEntry(
+                date=None,
+                dr_amount=0,
+                cr_amount=0,
+                narration="opening balance",
+                balance=opening_balance,
+                event_id=None
+            )
+        )
 
     def add_entry(self, date: datetime, dr_amount: float, cr_amount: float, narration: str, event_id: Optional[str]):
-        if self.__max_entry_date is None:
-            self.__max_entry_date = date
-        if date < self.__max_entry_date:
+        if len(self.__entries) > 1 and date < self.__entries[-1].date:
             raise InvalidLedgerEntry("Backdated entry can't be added")
-        self.__balance += dr_amount - cr_amount if self.balance_type == BalanceType.DEBIT else cr_amount - dr_amount
+        balance = self.__entries[-1].balance
+        balance += dr_amount - cr_amount if self.balance_type == BalanceType.DEBIT else cr_amount - dr_amount
         self.__entries.append(
             LedgerEntry(
                 date=date,
                 dr_amount=dr_amount,
                 cr_amount=cr_amount,
                 narration=narration,
-                balance=self.__balance,
+                balance=balance,
                 event_id=event_id
             )
         )
-        self.__max_entry_date = date
 
     def get_balance(self, as_of: Optional[datetime] = None) -> float:
         if as_of is None:
-            return self.__balance
+            return self.__entries[-1].balance
 
-        balance = 0
-        start, end = 0, len(self.__entries) - 1
+        balance = self.__entries[0].balance
+        start, end = 1, len(self.__entries) - 1
         while start <= end:
             mid = (start + end) // 2
             if self.__entries[mid].date <= as_of:
