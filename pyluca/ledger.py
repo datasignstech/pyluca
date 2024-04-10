@@ -13,13 +13,13 @@ class InvalidLedgerEntry(Exception):
 
 
 class LedgerEntry(NamedTuple):
-    sl_no: int
     date: datetime
     dr_amount: float
     cr_amount: float
     narration: str
     balance: float
     event_id: Optional[str]
+    sl_no: Optional[int]
 
 
 class AccountLedger:
@@ -30,12 +30,12 @@ class AccountLedger:
 
     def add_entry(
             self,
-            sl_no: int,
             date: datetime,
             dr_amount: float,
             cr_amount: float,
             narration: str,
-            event_id: Optional[str]
+            event_id: Optional[str],
+            sl_no: Optional[int],
     ):
         if len(self.__entries) and date < self.__entries[-1].date:
             raise InvalidLedgerEntry("Backdated entry can't be added")
