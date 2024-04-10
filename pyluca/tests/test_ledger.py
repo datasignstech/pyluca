@@ -9,64 +9,78 @@ from pyluca.tests.test_aging import account_config
 sample_ledger_entries = [
     {
         'sl_no': 1,
+        'account': 'SAVINGS',
         'date': datetime(2024, 3, 1),
         'dr_amount': 0,
         'cr_amount': 20000,
         'narration': 'salary credited',
         'balance': 20000,
+        'key': '1',
         'event_id': None
     },
     {
         'sl_no': 2,
+        'account': 'SAVINGS',
         'date': datetime(2024, 3, 2),
         'dr_amount': 5000,
         'cr_amount': 0,
         'narration': 'home loan emi',
         'balance': 15000,
+        'key': '1',
         'event_id': None
     },
     {
         'sl_no': 3,
+        'account': 'SAVINGS',
         'date': datetime(2024, 3, 3),
         'dr_amount': 3000,
         'cr_amount': 0,
         'narration': 'bike emi',
         'balance': 12000,
+        'key': '1',
         'event_id': None
     },
     {
         'sl_no': 4,
+        'account': 'SAVINGS',
         'date': datetime(2024, 3, 4),
         'dr_amount': 10000,
         'cr_amount': 0,
         'narration': 'Rent',
         'balance': 2000,
+        'key': '1',
         'event_id': None
     },
     {
         'sl_no': 5,
+        'account': 'SAVINGS',
         'date': datetime(2024, 3, 5),
         'dr_amount': 0,
         'cr_amount': 5000,
         'narration': 'borrowed from friend',
         'balance': 7000,
+        'key': '1',
         'event_id': None
     },
     {
         'sl_no': 6,
+        'account': 'SAVINGS',
         'date': datetime(2024, 3, 6),
         'dr_amount': 4000,
         'cr_amount': 0,
         'narration': 'SIP Investment',
         'balance': 3000,
+        'key': '1',
         'event_id': None
     },
     {
         'sl_no': 7,
+        'account': 'SAVINGS',
         'date': datetime(2024, 3, 6),
         'balance': 2000,
         'cr_amount': 0,
         'dr_amount': 1000,
+        'key': '1',
         'event_id': None,
         'narration': 'shopping'
     }
@@ -191,7 +205,12 @@ class TestLedger(TestCase):
         self.assertEqual(ledger.get_balances(), ledger.get_balances(datetime(2022, 5, 2)))
 
     def test_account_ledger(self):
-        ledger = AccountLedger("Savings", BalanceType.CREDIT)
+        ledger = AccountLedger("SAVINGS", "Savings", BalanceType.CREDIT, "1")
+        self.assertEqual(ledger.account, "SAVINGS")
+        self.assertEqual(ledger.account_name, "Savings")
+        self.assertEqual(ledger.balance_type, BalanceType.CREDIT)
+        self.assertEqual(ledger.key, "1")
+        self.assertEqual(ledger.get_balance(), 0)
         ledger.add_entry(sl_no=1, date=datetime(2024, 3, 1), dr_amount=0, cr_amount=20000, narration="salary credited",
                          event_id=None)
         self.assertEqual(ledger.get_balance(), 20000)
@@ -223,7 +242,7 @@ class TestLedger(TestCase):
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 3, 7)), 2000)
         self.assertEqual([entry._asdict() for entry in ledger.get_entries()], sample_ledger_entries)
 
-        ledger = AccountLedger("Asset", BalanceType.DEBIT)
+        ledger = AccountLedger("ASSET", "Asset", BalanceType.DEBIT, "2")
         ledger.add_entry(sl_no=1, date=datetime(2024, 3, 1), dr_amount=5000, cr_amount=0, narration="lent to friend",
                          event_id=None)
         ledger.add_entry(sl_no=2, date=datetime(2024, 3, 2), dr_amount=0, cr_amount=2000, narration="received 2000",
