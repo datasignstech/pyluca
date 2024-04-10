@@ -8,6 +8,7 @@ from pyluca.tests.test_aging import account_config
 
 sample_ledger_entries = [
     {
+        'sl_no': 1,
         'date': datetime(2024, 3, 1),
         'dr_amount': 0,
         'cr_amount': 20000,
@@ -16,6 +17,7 @@ sample_ledger_entries = [
         'event_id': None
     },
     {
+        'sl_no': 2,
         'date': datetime(2024, 3, 2),
         'dr_amount': 5000,
         'cr_amount': 0,
@@ -24,6 +26,7 @@ sample_ledger_entries = [
         'event_id': None
     },
     {
+        'sl_no': 3,
         'date': datetime(2024, 3, 3),
         'dr_amount': 3000,
         'cr_amount': 0,
@@ -32,6 +35,7 @@ sample_ledger_entries = [
         'event_id': None
     },
     {
+        'sl_no': 4,
         'date': datetime(2024, 3, 4),
         'dr_amount': 10000,
         'cr_amount': 0,
@@ -40,6 +44,7 @@ sample_ledger_entries = [
         'event_id': None
     },
     {
+        'sl_no': 5,
         'date': datetime(2024, 3, 5),
         'dr_amount': 0,
         'cr_amount': 5000,
@@ -48,6 +53,7 @@ sample_ledger_entries = [
         'event_id': None
     },
     {
+        'sl_no': 6,
         'date': datetime(2024, 3, 6),
         'dr_amount': 4000,
         'cr_amount': 0,
@@ -56,6 +62,7 @@ sample_ledger_entries = [
         'event_id': None
     },
     {
+        'sl_no': 7,
         'date': datetime(2024, 3, 6),
         'balance': 2000,
         'cr_amount': 0,
@@ -185,27 +192,28 @@ class TestLedger(TestCase):
 
     def test_account_ledger(self):
         ledger = AccountLedger("Savings", BalanceType.CREDIT)
-        ledger.add_entry(date=datetime(2024, 3, 1), dr_amount=0, cr_amount=20000, narration="salary credited",
+        self.assertEqual(ledger.get_balance(), 0)
+        ledger.add_entry(sl_no=1, date=datetime(2024, 3, 1), dr_amount=0, cr_amount=20000, narration="salary credited",
                          event_id=None)
         self.assertEqual(ledger.get_balance(), 20000)
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 2, 29)), 0)
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 3, 1)), 20000)
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 3, 2)), 20000)
         with self.assertRaises(InvalidLedgerEntry) as e:
-            ledger.add_entry(date=datetime(2024, 2, 29), dr_amount=5000, cr_amount=0, narration="loan emi",
+            ledger.add_entry(sl_no=2, date=datetime(2024, 2, 29), dr_amount=5000, cr_amount=0, narration="loan emi",
                              event_id=None)
         self.assertEqual(e.exception.__str__(), "Backdated entry can't be added")
-        ledger.add_entry(date=datetime(2024, 3, 2), dr_amount=5000, cr_amount=0, narration="home loan emi",
+        ledger.add_entry(sl_no=2, date=datetime(2024, 3, 2), dr_amount=5000, cr_amount=0, narration="home loan emi",
                          event_id=None)
-        ledger.add_entry(date=datetime(2024, 3, 3), dr_amount=3000, cr_amount=0, narration="bike emi",
+        ledger.add_entry(sl_no=3, date=datetime(2024, 3, 3), dr_amount=3000, cr_amount=0, narration="bike emi",
                          event_id=None)
-        ledger.add_entry(date=datetime(2024, 3, 4), dr_amount=10000, cr_amount=0, narration="Rent",
+        ledger.add_entry(sl_no=4, date=datetime(2024, 3, 4), dr_amount=10000, cr_amount=0, narration="Rent",
                          event_id=None)
-        ledger.add_entry(date=datetime(2024, 3, 5), dr_amount=0, cr_amount=5000, narration="borrowed from friend",
+        ledger.add_entry(sl_no=5, date=datetime(2024, 3, 5), dr_amount=0, cr_amount=5000, narration="borrowed from friend",
                          event_id=None)
-        ledger.add_entry(date=datetime(2024, 3, 6), dr_amount=4000, cr_amount=0, narration="SIP Investment",
+        ledger.add_entry(sl_no=6, date=datetime(2024, 3, 6), dr_amount=4000, cr_amount=0, narration="SIP Investment",
                          event_id=None)
-        ledger.add_entry(date=datetime(2024, 3, 6), dr_amount=1000, cr_amount=0, narration="shopping",
+        ledger.add_entry(sl_no=7, date=datetime(2024, 3, 6), dr_amount=1000, cr_amount=0, narration="shopping",
                          event_id=None)
         self.assertEqual(ledger.get_balance(), 2000)
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 3, 2)), 15000)
@@ -217,11 +225,11 @@ class TestLedger(TestCase):
         self.assertEqual([entry._asdict() for entry in ledger.get_entries()], sample_ledger_entries)
 
         ledger = AccountLedger("Asset", BalanceType.DEBIT)
-        ledger.add_entry(date=datetime(2024, 3, 1), dr_amount=5000, cr_amount=0, narration="lent to friend",
+        ledger.add_entry(sl_no=1, date=datetime(2024, 3, 1), dr_amount=5000, cr_amount=0, narration="lent to friend",
                          event_id=None)
-        ledger.add_entry(date=datetime(2024, 3, 2), dr_amount=0, cr_amount=2000, narration="received 2000",
+        ledger.add_entry(sl_no=2, date=datetime(2024, 3, 2), dr_amount=0, cr_amount=2000, narration="received 2000",
                          event_id=None)
-        ledger.add_entry(date=datetime(2024, 3, 3), dr_amount=3000, cr_amount=0, narration="Invested in stock",
+        ledger.add_entry(sl_no=3, date=datetime(2024, 3, 3), dr_amount=3000, cr_amount=0, narration="Invested in stock",
                          event_id=None)
         self.assertEqual(ledger.get_balance(), 6000)
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 2, 29)), 0)
