@@ -19,6 +19,7 @@ class LedgerEntry(NamedTuple):
     narration: str
     balance: float
     event_id: Optional[str]
+    sl_no: Optional[int]
 
 
 class AccountLedger:
@@ -27,13 +28,22 @@ class AccountLedger:
         self.balance_type = balance_type
         self.__entries: List[LedgerEntry] = []
 
-    def add_entry(self, date: datetime, dr_amount: float, cr_amount: float, narration: str, event_id: Optional[str]):
+    def add_entry(
+            self,
+            date: datetime,
+            dr_amount: float,
+            cr_amount: float,
+            narration: str,
+            event_id: Optional[str],
+            sl_no: Optional[int],
+    ):
         if len(self.__entries) and date < self.__entries[-1].date:
             raise InvalidLedgerEntry("Backdated entry can't be added")
         balance = self.__entries[-1].balance if len(self.__entries) else 0
         balance += dr_amount - cr_amount if self.balance_type == BalanceType.DEBIT else cr_amount - dr_amount
         self.__entries.append(
             LedgerEntry(
+                sl_no=sl_no,
                 date=date,
                 dr_amount=dr_amount,
                 cr_amount=cr_amount,
@@ -45,7 +55,7 @@ class AccountLedger:
 
     def get_balance(self, as_of: Optional[datetime] = None) -> float:
         if as_of is None:
-            return self.__entries[-1].balance
+            return self.__entries[-1].balance if len(self.__entries) else 0
 
         balance = 0
         start, end = 0, len(self.__entries) - 1
