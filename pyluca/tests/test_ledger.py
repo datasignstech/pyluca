@@ -192,6 +192,7 @@ class TestLedger(TestCase):
 
     def test_account_ledger(self):
         ledger = AccountLedger("Savings", BalanceType.CREDIT)
+        self.assertEqual(ledger.get_balance(), 0)
         ledger.add_entry(sl_no=1, date=datetime(2024, 3, 1), dr_amount=0, cr_amount=20000, narration="salary credited",
                          event_id=None)
         self.assertEqual(ledger.get_balance(), 20000)
