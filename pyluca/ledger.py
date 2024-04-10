@@ -14,18 +14,22 @@ class InvalidLedgerEntry(Exception):
 
 class LedgerEntry(NamedTuple):
     sl_no: int
+    account: str
     date: datetime
     dr_amount: float
     cr_amount: float
     narration: str
     balance: float
+    key: str
     event_id: Optional[str]
 
 
 class AccountLedger:
-    def __init__(self, account_name: str, balance_type: BalanceType):
+    def __init__(self, account: str, account_name: str, balance_type: BalanceType, key: str):
+        self.account = account
         self.account_name = account_name
         self.balance_type = balance_type
+        self.key = key
         self.__entries: List[LedgerEntry] = []
 
     def add_entry(
@@ -44,11 +48,13 @@ class AccountLedger:
         self.__entries.append(
             LedgerEntry(
                 sl_no=sl_no,
+                account=self.account,
                 date=date,
                 dr_amount=dr_amount,
                 cr_amount=cr_amount,
                 narration=narration,
                 balance=balance,
+                key=self.key,
                 event_id=event_id
             )
         )
