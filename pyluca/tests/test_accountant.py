@@ -13,24 +13,20 @@ class TestAccountant(TestCase):
         accountant = Accountant(Journal(), account_config, 'person1')
         accountant.enter_journal('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30), 'April salary')
         self.assertEqual(len(accountant.journal.entries), 2)
-        ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 20000)
-        self.assertEqual(ledger.get_account_balance('SALARY'), 20000)
-        self.assertEqual(len(ledger.get_df()), 2)
+        self.assertEqual(accountant.ledger.get_account_balance('SAVINGS_BANK'), 20000)
+        self.assertEqual(accountant.ledger.get_account_balance('SALARY'), 20000)
+        self.assertEqual(len(accountant.ledger.get_df()), 2)
 
         accountant.enter_journal('MUTUAL_FUNDS', 'SAVINGS_BANK', 10000, datetime(2022, 5, 1), 'ELSS')
-        ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 10000)
-        self.assertEqual(ledger.get_account_balance('MUTUAL_FUNDS'), 10000)
+        self.assertEqual(accountant.ledger.get_account_balance('SAVINGS_BANK'), 10000)
+        self.assertEqual(accountant.ledger.get_account_balance('MUTUAL_FUNDS'), 10000)
 
         accountant.enter_journal('LOANS', 'SAVINGS_BANK', 5000, datetime(2022, 5, 2), 'Lend to Pramod')
-        ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('LOANS'), 5000)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 5000)
+        self.assertEqual(accountant.ledger.get_account_balance('LOANS'), 5000)
+        self.assertEqual(accountant.ledger.get_account_balance('SAVINGS_BANK'), 5000)
 
         accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2), 'EMI 3/48')
-        ledger = Ledger(accountant.journal, accountant.config)
-        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2000)
+        self.assertEqual(accountant.ledger.get_account_balance('SAVINGS_BANK'), 2000)
 
         bal, ledger, acct_type_bal = {}, Ledger(accountant.journal, accountant.config), defaultdict(int)
         for acct_name, acct in account_config['accounts'].items():
