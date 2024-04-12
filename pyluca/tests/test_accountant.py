@@ -29,6 +29,7 @@ class TestAccountant(TestCase):
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 5000)
 
         accountant.enter_journal('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2), 'EMI 3/48')
+        ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 2000)
 
         bal, ledger, acct_type_bal = {}, Ledger(accountant.journal, accountant.config), defaultdict(int)

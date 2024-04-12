@@ -72,19 +72,97 @@ sample_ledger_entries = [
     }
 ]
 
+sample_ledger = [
+    {
+        'date': datetime(2022, 4, 30, 10, 15),
+        'dr_amount': 20000, 'cr_amount': 0,
+        'narration': 'April salary',
+        'balance': 20000,
+        'event_id': None,
+        'sl_no': 0,
+        'account': 'SAVINGS_BANK',
+        'key': 'loan'
+    },
+    {
+        'date': datetime(2022, 4, 30, 10, 15),
+        'dr_amount': 0,
+        'cr_amount': 20000,
+        'narration': 'April salary',
+        'balance': 20000,
+        'event_id': None,
+        'sl_no': 1,
+        'account': 'SALARY',
+        'key': 'loan'
+    },
+    {
+        'date': datetime(2022, 5, 1, 0, 0),
+        'dr_amount': 10000,
+        'cr_amount': 0,
+        'narration': 'ELSS',
+        'balance': 10000,
+        'event_id': None,
+        'sl_no': 2,
+        'account': 'MUTUAL_FUNDS',
+        'key': 'loan'
+    },
+    {
+        'date': datetime(2022, 5, 1, 0, 0),
+        'dr_amount': 0,
+        'cr_amount': 10000,
+        'narration': 'ELSS',
+        'balance': 10000, 'event_id': None,
+        'sl_no': 3,
+        'account': 'SAVINGS_BANK',
+        'key': 'loan'
+    },
+    {
+        'date': datetime(2022, 5, 2, 10, 40),
+        'dr_amount': 5000,
+        'cr_amount': 0,
+        'narration': 'Lent to friend',
+        'balance': 5000,
+        'event_id': None,
+        'sl_no': 4,
+        'account': 'LOANS',
+        'key': 'loan'
+    },
+    {
+        'date': datetime(2022, 5, 2, 10, 40),
+        'dr_amount': 0,
+        'cr_amount': 5000,
+        'narration': 'Lent to friend',
+        'balance': 5000,
+        'event_id': None,
+        'sl_no': 5,
+        'account': 'SAVINGS_BANK',
+        'key': 'loan'
+    },
+    {
+        'date': datetime(2022, 5, 2, 10, 45),
+        'dr_amount': 3000,
+        'cr_amount': 0,
+        'narration': 'EMI 3/48',
+        'balance': 3000,
+        'event_id': None,
+        'sl_no': 6,
+        'account': 'CAR_EMI',
+        'key': 'loan'
+    },
+    {
+        'date': datetime(2022, 5, 2, 10, 45),
+        'dr_amount': 0,
+        'cr_amount': 3000,
+        'narration': 'EMI 3/48',
+        'balance': 2000,
+        'event_id': None,
+        'sl_no': 7,
+        'account': 'SAVINGS_BANK',
+        'key': 'loan'
+    }
+]
+
 
 class TestLedger(TestCase):
-    def test_ledger_aging(self):
-        dt = datetime.now()
-        journal = Journal([
-            JournalEntry(1, 'SAVINGS_BANK', 1000, 0, dt, '', '1', None),
-            JournalEntry(2, 'SAVINGS_BANK', 1000, 0, dt, '', '1', None),
-            JournalEntry(3, 'SAVINGS_BANK', 0, 3000, dt, '', '1', None),
-            JournalEntry(4, 'SAVINGS_BANK', 2000, 0, dt, '', '1', None),
-        ])
-        aging = Ledger(journal, account_config).get_aging('SAVINGS_BANK')
-        self.assertEqual(len(aging.ages), 3)
-
     def test_ledger_balance_sheet(self):
         accountant = Accountant(Journal(), account_config, '1')
         accountant.enter_journal('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30), 'April salary')
@@ -237,3 +315,14 @@ class TestLedger(TestCase):
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 3, 2)), 3000)
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 3, 3)), 6000)
         self.assertEqual(ledger.get_balance(as_of=datetime(2024, 3, 4)), 6000)
+
+    def test_get_ledger(self):
+        ledger = Ledger(Journal(), account_config, 'loan')
+        ledger.add_entry('SAVINGS_BANK', 'SALARY', 20000, datetime(2022, 4, 30, 10, 15), 'April salary')
+        ledger.add_entry('MUTUAL_FUNDS', 'SAVINGS_BANK', 10000, datetime(2022, 5, 1, 0, 0), 'ELSS')
+        ledger.add_entry('LOANS', 'SAVINGS_BANK', 5000, datetime(2022, 5, 2, 10, 40), 'Lent to friend')
+        ledger.add_entry('CAR_EMI', 'SAVINGS_BANK', 3000, datetime(2022, 5, 2, 10, 45), 'EMI 3/48')
+        self.assertEqual(ledger.get_ledger(), sample_ledger)
+        columns = ledger.get_df().columns
+        self.assertEqual('balance' in columns, False)
+        self.assertEqual('account_name' in columns, True)

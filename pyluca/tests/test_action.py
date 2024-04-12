@@ -267,15 +267,11 @@ class TestAction(TestCase):
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 5000)
         self.assertEqual(ledger.get_account_balance('LOANS'), 5000)
-        aging = ledger.get_aging('LOANS')
-        self.assertEqual(aging.ages[0].meta, {'due_date': '2022-6-21'})
 
         event = ClearLoansEvent('4', datetime(2022, 4, 25), datetime(2022, 4, 25))
         apply(event, accountant)
         ledger = Ledger(accountant.journal, accountant.config)
         self.assertEqual(ledger.get_account_balance('LOANS'), 0)
-        aging = ledger.get_aging('LOANS')
-        self.assertEqual(aging.ages[0].counter.payments[-1].date, datetime(2022, 4, 25))
 
         event = LendEvent('5', 5000, '2022-6-21', datetime(2022, 4, 26), datetime(2022, 4, 26), risky=True)
         apply(event, accountant)
@@ -322,7 +318,7 @@ class TestAction(TestCase):
         ]
         for e in events:
             apply(e, accountant)
-        for je in Ledger(accountant.journal, accountant.config).journal.entries:
+        for je in accountant.journal.entries:
             if je.account == 'CHARITY':
                 self.assertEqual(je.narration, 'Give charity to TATA Trusts on 10/05/2022')
             if je.account == 'FIXED_DEPOSIT':
