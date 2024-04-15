@@ -2,6 +2,7 @@ import datetime
 import json
 from typing import Optional
 from pyluca.journal import Journal, JournalEntry
+from pyluca.ledger import Ledger
 
 
 class Accountant:
@@ -9,6 +10,7 @@ class Accountant:
         self.journal = journal
         self.config = config
         self.key = key
+        self.ledger = Ledger(journal, config, key)
 
     def enter_journal(
             self,
@@ -25,6 +27,7 @@ class Accountant:
             JournalEntry(len(self.journal.entries), dr_account, amount, 0, date, narration, self.key, event_id))
         self.journal.add_entry(
             JournalEntry(len(self.journal.entries), cr_account, 0, amount, date, narration, self.key, event_id))
+        self.ledger.add_entry(dr_account, cr_account, amount, date, narration, event_id)
 
     def record(
             self,
