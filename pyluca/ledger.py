@@ -152,8 +152,8 @@ class Ledger:
 
     def get_df(self) -> pd.DataFrame:
         ledger_df = pd.DataFrame(self.get_ledger())
-        ledger_df.drop(columns=['balance'], inplace=True)
         if not ledger_df.empty:
+            ledger_df.drop(columns=['balance'], inplace=True)
             ledger_df['account_name'] = ledger_df['account'].apply(lambda x: self.config['accounts'][x].get('name', x))
         return ledger_df
 
