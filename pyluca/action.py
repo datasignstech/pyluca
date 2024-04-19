@@ -2,7 +2,6 @@ import re
 import json
 from typing import Union
 from pyluca.accountant import Accountant
-from pyluca.ledger import Ledger
 from pyluca.event import Event
 
 _OPERATOR_CONFIG = {
@@ -47,7 +46,7 @@ def _get_param(
         next_key = key.replace('context.', '')
         return _get_param(context[next_key], event, accountant, context)
     if key.startswith('balance.'):
-        return Ledger(accountant.journal, accountant.config).get_account_balance(key.replace('balance.', ''))
+        return accountant.ledger.get_account_balance(key.replace('balance.', ''))
     if hasattr(event, key):
         return event.__getattribute__(key)
     raise NotImplementedError(f'param {key} not implemented')
