@@ -357,6 +357,9 @@ class TestAction(TestCase):
 
     def test_and_operator(self):
         config = {**personal_fin_config}
+        config['actions_config'] = {**config['actions_config']}
+        config['actions_config']['on_event'] = {**config['actions_config']['on_event']}
+        config['actions_config']['on_event']['SalaryEvent'] = {**config['actions_config']['on_event']['SalaryEvent']}
         config['actions_config']['on_event']['SalaryEvent']['actions'] = [
             {
                 'dr_account': 'SAVINGS_BANK',
@@ -387,6 +390,9 @@ class TestAction(TestCase):
 
     def test_or_operator(self):
         config = {**personal_fin_config}
+        config['actions_config'] = {**config['actions_config']}
+        config['actions_config']['on_event'] = {**config['actions_config']['on_event']}
+        config['actions_config']['on_event']['SalaryEvent'] = {**config['actions_config']['on_event']['SalaryEvent']}
         config['actions_config']['on_event']['SalaryEvent']['actions'] = [
             {
                 'dr_account': 'SAVINGS_BANK',
