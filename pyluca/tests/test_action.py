@@ -354,3 +354,63 @@ class TestAction(TestCase):
             apply(e, accountant, external_actions={'check_balance': __check_balance})
 
         self.assertTrue(local_state['checked'])
+
+    def test_and_operator(self):
+        config = {**personal_fin_config}
+        config['actions_config']['on_event']['SalaryEvent']['actions'] = [
+            {
+                'dr_account': 'SAVINGS_BANK',
+                'cr_account': 'SALARY',
+                'amount': 'amount',
+                'narration': 'Salary'
+            },
+            {
+                'iff': {
+                    'type': 'and',
+                    'a': {'type': '>', 'a': 'amount', 'b': 10000},
+                    'b': {'type': '<', 'a': 'amount', 'b': 30000}
+                },
+                'dr_account': 'FIXED_DEPOSIT',
+                'cr_account': 'SAVINGS_BANK',
+                'amount': 5000,
+                'narration': 'Conditional FD'
+            }
+        ]
+
+        accountant = Accountant(Journal(), config, '1')
+        event = SalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
+        apply(event, accountant)
+        
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 5000)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 15000)
+
+    def test_or_operator(self):
+        config = {**personal_fin_config}
+        config['actions_config']['on_event']['SalaryEvent']['actions'] = [
+            {
+                'dr_account': 'SAVINGS_BANK',
+                'cr_account': 'SALARY',
+                'amount': 'amount',
+                'narration': 'Salary'
+            },
+            {
+                'iff': {
+                    'type': 'or',
+                    'a': {'type': '<', 'a': 'amount', 'b': 10000},
+                    'b': {'type': '>', 'a': 'amount', 'b': 15000}
+                },
+                'dr_account': 'FIXED_DEPOSIT',
+                'cr_account': 'SAVINGS_BANK',
+                'amount': 2000,
+                'narration': 'Conditional FD'
+            }
+        ]
+
+        accountant = Accountant(Journal(), config, '1')
+        event = SalaryEvent('1', 20000, datetime(2022, 4, 21), datetime(2022, 4, 21))
+        apply(event, accountant)
+        
+        ledger = Ledger(accountant.journal, accountant.config)
+        self.assertEqual(ledger.get_account_balance('FIXED_DEPOSIT'), 2000)
+        self.assertEqual(ledger.get_account_balance('SAVINGS_BANK'), 18000)
