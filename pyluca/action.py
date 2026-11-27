@@ -17,7 +17,9 @@ _OPERATOR_CONFIG = {
     '>': lambda a, b: a > b,
     '<': lambda a, b: a < b,
     '>=': lambda a, b: a >= b,
-    '<=': lambda a, b: a <= b
+    '<=': lambda a, b: a <= b,
+    'and': lambda a, b: a and b,
+    'or': lambda a, b: a or b
 }
 
 
